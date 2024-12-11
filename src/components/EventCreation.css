@@ -1,0 +1,324 @@
+:root {
+  --primary-color: #4a6cf7;
+  --secondary-color: #38d8b3;
+  --background-color: #f9fafb;
+  --text-color: #1a2b3c;
+  --card-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  --transition-speed: 0.3s;
+}
+
+* {
+  box-sizing: border-box;
+  transition: all var(--transition-speed) ease;
+}
+
+.modern-event-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 20px 20px 120px; /* Increased left padding for navbar space */
+  background-color: var(--background-color);
+  min-height: 100vh;
+  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+}
+
+.view-toggle {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.flip-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 14px 28px;
+  border-radius: 60px;
+  cursor: pointer;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  box-shadow: 0 6px 12px rgba(74, 108, 247, 0.2);
+  transform: perspective(1000px);
+}
+
+.flip-button:hover {
+  background-color: #3a54c9;
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 16px rgba(74, 108, 247, 0.3);
+}
+
+.modern-form-container {
+  background-color: white;
+  border-radius: 20px;
+  padding: 50px;
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.modern-form-container form {
+  display: grid;
+  gap: 25px;
+}
+
+
+
+
+.modern-form-container h2 {
+  text-align: center;
+  color: var(--text-color);
+  margin-bottom: 40px;
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+  width: 100%;
+  padding: 15px 18px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  font-size: 16px;
+  background-color: #f9f9fc;
+}
+
+.form-group input:focus, 
+.form-group select:focus, 
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(74, 108, 247, 0.15);
+}
+
+.events-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+}
+
+.event-card {
+  background-color: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: var(--card-shadow);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transform: perspective(1000px);
+}
+
+
+.event-card-header {
+  background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  color: white;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: -20px;
+}
+
+.form-row.side-by-side {
+  display: flex;
+  gap: 1rem; /* Space between date and time fields */
+}
+
+.form-row.side-by-side .form-group.half {
+  flex: 1; /* Ensures both fields are equal width */
+}
+
+.form-row.side-by-side .form-group label {
+  display: block;
+  margin-bottom: 0.5rem; /* Space between label and input */
+}
+
+input[type="date"],
+input[type="time"] {
+  width: 100%;
+  padding: 0.9rem;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  font-size: 1rem;
+}
+
+
+/* Switch container styling */
+.switch-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Align label and switch */
+  width: 100%;
+  padding: 0.2rem;
+}
+
+/* Hide the default checkbox */
+.switch-input {
+  display: none;
+}
+
+/* Slider styles for the switch */
+.slider {
+  position: relative;
+  width: 2.5rem;
+  height: 1.5rem;
+  background-color: #ccc;
+  border-radius: 1.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Circle inside the switch */
+.slider:before {
+  content: "";
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  background-color: white;
+  border-radius: 50%;
+  top: 0.25rem;
+  left: 0.25rem;
+  transition: transform 0.3s ease;
+}
+
+.form-row.toggle-switches {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.checkbox-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.toggle-switches .switch-container {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* When checkbox is checked */
+.switch-input:checked + .slider {
+  background-color: #4caf50; /* Active color */
+}
+
+.switch-input:checked + .slider:before {
+  transform: translateX(1rem); /* Move circle to the right */
+}
+
+/* Team Leader Section Styling */
+.team-leader-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.team-leader-contact input {
+  width: 100%;
+  padding: 15px 18px;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  font-size: 16px;
+  background-color: #f9f9fc;
+}
+
+.team-leader-contact input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 4px rgba(74, 108, 247, 0.15);
+}
+
+.event-card-actions {
+  display: flex;
+  justify-content: space-between; /* Spreads out buttons */
+  align-items: center;
+  padding: 15px;
+  gap: 30px; /* Space between buttons */
+}
+
+.read-only-input {
+  background-color: #f4f4f4;
+  cursor: not-allowed;
+  color: #666;
+}
+
+.edit-name-note {
+  color: #666;
+  font-style: italic;
+  margin-top: 5px;
+  margin-left: 10px;
+  display: block;
+  text-align: left;
+}
+
+.event-details {
+  margin-right: 50px;
+}
+
+.event-details p{
+  text-align: left;
+  padding-left: 9px ;
+}
+
+.event-card-actions button {
+  flex: 1; /* Equal width buttons */
+  background-color: transparent;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  padding: 10px 20px;
+  border-radius: 30px;
+  transition: all var(--transition-speed) ease;
+  cursor: pointer;
+}
+
+.event-card-actions button:first-child {
+  margin-right: 10px; /* Additional space for edit button */
+}
+
+.event-card-actions button:hover {
+  background-color: var(--primary-color);
+  color: white;
+  transform: translateY(-3px);
+}
+
+.event-card-actions button:active {
+  transform: translateY(-1px);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .modern-event-container {
+    padding: 20px; /* Reset to normal padding for mobile */
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  .modern-form-container {
+    padding: 30px 20px;
+  }
+
+  .events-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .modern-form-container h2 {
+    font-size: 2rem;
+  }
+}
+
+/* Additional Subtle Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.event-card, .form-group {
+  animation: fadeIn 0.5s ease forwards;
+}

@@ -1,0 +1,136 @@
+:root {
+  --primary-color: #4f46e5;  /* Primary color for buttons and headings */
+  --secondary-color: #7c3aed; /* Secondary color for highlights */
+  --text-color: #1f2937; /* Main text color */
+  --background-color: #f3f4f6; /* Background color */
+  --card-background: #ffffff; /* Background color of the card */
+  --input-background: #f9fafb; /* Input background color */
+  --input-border: #d1d5db; /* Border color for inputs */
+  --input-focus: #3b82f6; /* Border color when input is focused */
+  --button-hover: #4338ca; /* Button hover color */
+  --icon-color: #6b7280; /* Icon color */
+  --animation-timing: 0.3s ease; /* Animation timing */
+}
+
+
+.register-form-body {
+  font-family: 'Inter', sans-serif; /* Font family for the entire page */
+  background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); /* Gradient background */
+  color: var(--text-color); /* Main text color */
+  min-height: 100vh; /* Minimum height for the body */
+  display: flex; /* Flex display for centering */
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  padding: 2rem; /* Padding around the body */
+  overflow: hidden;
+}
+
+.register-form-container {
+  width: 100%; /* Full width for the container */
+  max-width: 600px; /* Default max width for the container */
+  animation: fadeIn 0.5s ease-out; /* Fade-in animation */
+}
+
+@media (min-width: 1024px) {
+  .register-form-container {
+    max-width: 700px; /* Increased max width for desktop view */
+  }
+}
+
+.register-form-card {
+  background-color: var(--card-background); /* Card background color */
+  border-radius: 1rem; /* Rounded corners for the card */
+  padding: 2rem; /* Padding inside the card */
+}
+
+.form-title {
+  font-size: 2rem; /* Font size for the title */
+  text-align: center; /* Center text */
+  margin-bottom: 2rem; /* Bottom margin */
+  color: var(--primary-color); /* Title color */
+}
+
+.input-group {
+  display: grid; /* Grid display for input fields */
+  grid-template-columns: repeat(2, 1fr); /* Two columns for input fields */
+  gap: 1rem; /* Gap between input fields */
+}
+
+.team-members-grid {
+  display: grid; /* Grid display for team members */
+  grid-template-columns: repeat(2, 1fr); /* 2x2 grid for team members */
+  gap: 1rem; /* Gap between team member inputs */
+}
+
+.input-wrapper {
+  position: relative; /* Positioning for icon placement */
+}
+
+.input-icon {
+  position: absolute; /* Absolute positioning for the icon */
+  left: 1rem; /* Distance from the left */
+  top: 50%; /* Center vertically */
+  transform: translateY(-50%); /* Adjust for perfect vertical centering */
+  color: var(--icon-color); /* Icon color */
+  pointer-events: none; /* Prevent click events on icons */
+}
+
+.form-input {
+  width: 100%; /* Full width for input fields */
+  padding: 0.75rem 2.5rem; /* Padding for input fields */
+  border: 1px solid var(--input-border); /* Border style for input fields */
+  border-radius: 0.5rem; /* Rounded corners for input fields */
+  background-color: var(--input-background); /* Input background color */
+  outline: none; /* Remove default outline */
+  transition: border-color var(--animation-timing); /* Transition for border color */
+}
+
+.form-input:focus {
+  border-color: var(--input-focus); /* Border color on focus */
+}
+
+.team-members-title {
+  margin-top: 1.5rem; /* Top margin for team members title */
+  margin-bottom: 0.5rem; /* Bottom margin for team members title */
+  font-size: 1.25rem; /* Font size for team members title */
+  color: var(--primary-color); /* Title color */
+  display: flex; /* Flex display for icon alignment */
+  align-items: center; /* Center icon and text */
+}
+
+.section-icon {
+  margin-right: 0.5rem; /* Margin between icon and text */
+}
+
+.submit-button {
+  margin-top: 2rem; /* Top margin for the submit button */
+  width: 100%; /* Full width for the button */
+  padding: 1rem; /* Padding for the button */
+  background-color: var(--primary-color); /* Background color for the button */
+  color: #fff; /* Text color for the button */
+  border: none; /* Remove border */
+  border-radius: 0.5rem; /* Rounded corners for button */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color var(--animation-timing); /* Transition for background color */
+}
+
+.submit-button:hover {
+  background-color: var(--button-hover); /* Change color on hover */
+}
+
+@media (max-width: 640px) {
+  .input-group, .team-members-grid {
+    grid-template-columns: 1fr; /* One column for smaller screens */
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0; /* Start with opacity 0 */
+    transform: translateY(-20px); /* Start above the view */
+  }
+  to {
+    opacity: 1; /* End with full opacity */
+    transform: translateY(0); /* Final position */
+  }
+}

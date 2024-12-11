@@ -1,0 +1,63 @@
+.aboutContainer {
+  padding: 60px 20px; /* Padding for larger screens */
+  background-color: #e8f5e9;
+  text-align: center;
+  animation: fadeInUp 1.5s forwards;
+}
+
+.aboutContainer h2 {
+  font-size: 32px; /* Font size for larger screens */
+  margin-bottom: 30px;
+}
+
+.aboutContainer p {
+  font-size: 18px; /* Font size for larger screens */
+  max-width: 600px; /* Maximum width to maintain readability */
+  margin: 0 auto; /* Centering the paragraph */
+}
+
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(50px);
+  animation: fadeInUp 1.5s forwards;
+}
+
+@keyframes fadeInUp {
+  0% {
+      opacity: 0;
+      transform: translateY(50px);
+  }
+  100% {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+/* Media Queries for Mobile Responsiveness */
+@media (max-width: 768px) {
+  .aboutContainer {
+      padding: 40px 15px; /* Adjust padding for medium screens */
+  }
+
+  .aboutContainer h2 {
+      font-size: 28px; /* Slightly smaller font size */
+  }
+
+  .aboutContainer p {
+      font-size: 16px; /* Smaller font size for better fit */
+  }
+}
+
+@media (max-width: 480px) {
+  .aboutContainer {
+      padding: 30px 10px; /* Further reduced padding for small screens */
+  }
+
+  .aboutContainer h2 {
+      font-size: 24px; /* Even smaller font size for mobile */
+  }
+
+  .aboutContainer p {
+      font-size: 14px; /* Adjust paragraph font size */
+  }
+}

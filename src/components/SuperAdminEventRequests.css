@@ -1,0 +1,182 @@
+.super-admin-event-request-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    /* background-color: #ffffff; */
+    min-height: 100vh;
+  }
+  
+  .super-admin-event-request-title {
+    font-size: 2.5rem;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    text-align: center;
+    font-weight: 700;
+  }
+  
+  .super-admin-event-request-filters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+  
+  .super-admin-event-request-search,
+  .super-admin-event-request-select {
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .super-admin-event-request-search {
+    flex-grow: 1;
+    margin-right: 1rem;
+  }
+  
+  .super-admin-event-request-search:focus,
+  .super-admin-event-request-select:focus {
+    outline: none;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
+  }
+  
+  .super-admin-event-request-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+  
+  .super-admin-event-request-card {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .super-admin-event-request-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+  }
+  
+  .super-admin-event-request-card-header {
+    position: relative;
+  }
+  
+  .super-admin-event-request-image {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+  }
+  
+  .super-admin-event-request-status {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+  }
+  
+  .super-admin-event-request-status-pending {
+    background-color: #ffeaa7;
+    color: #fdcb6e;
+  }
+  
+  .super-admin-event-request-status-approved {
+    background-color: #55efc4;
+    color: #00b894;
+  }
+  
+  .super-admin-event-request-status-rejected {
+    background-color: #ff7675;
+    color: #d63031;
+  }
+  
+  .super-admin-event-request-card-body {
+    padding: 1.5rem;
+  }
+  
+  .super-admin-event-request-event-name {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .super-admin-event-request-college,
+  .super-admin-event-request-department {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+  }
+  
+  .super-admin-event-request-card-footer {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background-color: #f8f9fa;
+  }
+  
+  .super-admin-event-request-button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .super-admin-event-request-button-approve {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .super-admin-event-request-button-approve:hover {
+    background-color: #45a049;
+  }
+  
+  .super-admin-event-request-button-reject {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .super-admin-event-request-button-reject:hover {
+    background-color: #e53935;
+  }
+  
+  .super-admin-event-request-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .super-admin-event-request-button-show-more {
+    display: block;
+    margin: 2rem auto 0;
+    background-color: #3498db;
+    color: white;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+  }
+  
+  .super-admin-event-request-button-show-more:hover {
+    background-color: #2980b9;
+  }
+  
+  @media (max-width: 768px) {
+    .super-admin-event-request-filters {
+      flex-direction: column;
+    }
+  
+    .super-admin-event-request-search {
+      margin-right: 0;
+      margin-bottom: 1rem;
+    }
+  
+    .super-admin-event-request-grid {
+      grid-template-columns: 1fr;
+    }
+  }

@@ -1,0 +1,74 @@
+/* Base Styles */
+.registrations-page {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  align-items: center;
+}
+
+/* Centered Heading */
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Table Styles */
+.registrations-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 auto;
+  overflow-x: auto; /* Handle table overflow for small screens */
+}
+
+.registrations-table th,
+.registrations-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+  word-wrap: break-word; /* Ensure long content wraps */
+}
+
+.registrations-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.registrations-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.registrations-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+/* Loading and Error Message Styles */
+.loading,
+.error {
+  text-align: center;
+  color: #666;
+  margin-top: 50px;
+}
+
+/* Responsive Styles */
+@media (min-width: 768px) {
+  .registrations-page {
+    padding-left: 100px; /* Add left space for navbar on larger screens */
+  }
+}
+
+@media (max-width: 767px) {
+  .registrations-page {
+    padding-left: 10px; /* Remove left space for smaller screens */
+    padding-right: 10px;
+  }
+
+  .registrations-table th,
+  .registrations-table td {
+    font-size: 14px; /* Adjust font size for better readability */
+    padding: 6px;
+  }
+
+  h2 {
+    font-size: 18px; /* Adjust heading size */
+  }
+}

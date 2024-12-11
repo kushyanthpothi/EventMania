@@ -1,0 +1,232 @@
+/* Google Font Link */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
+
+/* Main container */
+.login-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
+}
+
+.login-name{
+  color: white !important;;
+}
+
+/* Form animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.login-form, .signup-form {
+  background-color: #2e005a;
+  border-radius: 15px;
+  padding: 40px;
+  width: 400px;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease;
+  transform: translateY(20px);
+  opacity: 0;
+  animation: slideIn 0.5s forwards;
+  position: relative;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Close button */
+.close-btn {
+  cursor: pointer;
+  font-size: 1.5em;
+  color: #ff4d4d;
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  transition: transform 0.3s;
+  z-index: 1;
+}
+
+.close-btn:hover {
+  transform: scale(1.2);
+}
+
+.signup-cursor {
+  cursor: pointer;
+}
+
+.signup-cursor:hover {
+  color: rgb(0, 229, 255);
+}
+
+/* Heading styles */
+h2 {
+  font-size: 1.5em;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Form layout */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* Input styles */
+.input-field {
+  background-color: #4b196f;
+  border: none;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 1em;
+  color: #fff;
+  transition: background-color 0.3s;
+}
+
+.input-field:focus {
+  outline: none;
+  background-color: #6a2c92;
+}
+
+/* Show password checkbox container */
+.show-password {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.show-password input[type="checkbox"] {
+  width: auto;
+  padding: 0;
+}
+
+/* Button styles */
+button {
+  background-color: #7e49d6;
+  color: white;
+  border: none;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+button:hover {
+  background-color: #a066e2;
+  transform: scale(1.05);
+}
+
+/* Paragraph styles */
+p {
+  margin-top: 10px;
+  font-size: 0.9em;
+  text-align: center;
+}
+
+/* Select dropdown styles */
+.select-wrapper {
+  position: relative;
+  width: 100%;
+  display: inline-block;
+}
+
+.custom-select {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  color: #333;
+  background: linear-gradient(135deg, #f3eafc, #ffffff);
+  border: 2px solid #4b196f;
+  border-radius: 8px;
+  appearance: none;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.select-wrapper::after {
+  content: '\25BC';
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  color: #4b196f;
+  pointer-events: none;
+}
+
+.custom-select:focus {
+  border-color: #4b196f;
+  background: linear-gradient(135deg, #f0e6f7, #ffffff);
+  box-shadow: 0 8px 12px rgba(75, 25, 111, 0.3);
+}
+
+.custom-select:hover {
+  background: linear-gradient(135deg, #ffffff, #f3eafc);
+}
+
+.custom-select {
+  animation: fadeIn 0.5s ease;
+}
+
+.custom-select option:disabled {
+  color: #ccc;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 768px) {
+  .login-popup {
+    padding: 10px;
+  }
+
+  .login-form, .signup-form {
+    width: 95%;
+    padding: 30px 20px;
+  }
+
+  .custom-select {
+    font-size: 14px;
+    padding: 10px;
+  }
+
+  h2 {
+    font-size: 1.3em;
+  }
+
+  button {
+    font-size: 0.9em;
+  }
+
+  p {
+    font-size: 0.8em;
+  }
+
+  input {
+    font-size: 0.9em;
+    padding: 12px;
+  }
+}

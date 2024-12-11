@@ -1,0 +1,301 @@
+@import url('https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700&display=swap');
+
+:root {
+  --primary-color: #00f2fe;
+  --secondary-color: #4facfe;
+  --text-color: #e0e0e0;
+  --background-color: #0a192f;
+  --card-background: rgba(255, 255, 255, 0.05);
+  --hover-color: #ff00ff;
+}
+
+
+
+.super-admin-home-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.super-admin-home-background-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  opacity: 0.05;
+  filter: blur(100px);
+  z-index: -1;
+  animation: backgroundShift 20s ease-in-out infinite alternate;
+}
+
+@keyframes backgroundShift {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.2); }
+}
+
+.super-admin-home-header {
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(10px);
+  border: rgba(0, 0, 0, 0.055) solid ;
+  padding: 1rem 2rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+
+
+.super-admin-home-header-content {
+  display: flex;
+  justify-content: space-between;
+  text-align: center;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.super-admin-home-header h1 {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 0;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.super-admin-home-clock {
+  font-size: 1.2rem;
+  font-weight: 300;
+}
+
+.super-admin-home-main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.super-admin-home-intro-section {
+  background: var(--card-background);
+  border-radius: 15px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.super-admin-home-intro-section:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.super-admin-home-intro-content h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.super-admin-home-stats {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 2rem;
+}
+
+.super-admin-home-stat-item {
+  text-align: center;
+}
+
+.super-admin-home-stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--secondary-color);
+  display: block;
+}
+
+.super-admin-home-stat-label {
+  font-size: 0.9rem;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.super-admin-home-action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.super-admin-home-btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: bold;
+  color: var(--text-color);
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+}
+
+.super-admin-home-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  background: var(--hover-color);
+  border-color: var(--hover-color);
+}
+
+.super-admin-home-btn-icon {
+  margin-right: 0.5rem;
+  font-size: 1.2rem;
+}
+
+.super-admin-home-events-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.super-admin-home-event-category h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: var(--primary-color);
+  text-align: center;
+  position: relative;
+}
+
+.super-admin-home-event-category h2::after {
+  content: '';
+  display: block;
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  margin: 0.5rem auto 0;
+}
+
+.super-admin-home-event-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.super-admin-home-event-card {
+  background: var(--card-background);
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.super-admin-home-event-card:hover {
+  transform: translateY(-10px) rotate(2deg);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.super-admin-home-event-image-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.super-admin-home-event-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.super-admin-home-event-card:hover .super-admin-home-event-image {
+  transform: scale(1.1);
+}
+
+.super-admin-home-event-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 0.5rem;
+  transform: translateY(100%);
+  transition: transform 0.3s ease;
+}
+
+.super-admin-home-event-card:hover .super-admin-home-event-overlay {
+  transform: translateY(0);
+}
+
+.super-admin-home-event-college {
+  color: var(--primary-color);
+  font-size: 0.9rem;
+}
+
+.super-admin-home-event-details {
+  padding: 1.5rem;
+}
+
+.super-admin-home-event-details h3 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+  color: var(--secondary-color);
+}
+
+.super-admin-home-event-description {
+  font-size: 1rem;
+  color: var(--text-color);
+  opacity: 0.8;
+  line-height: 1.5;
+}
+
+.super-admin-home-btn-show-more {
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 1rem auto;
+  display: block;
+  color: var(--background-color);
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.super-admin-home-btn-show-more:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+@media (max-width: 768px) {
+  .super-admin-home-event-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+  
+  .super-admin-home-action-buttons {
+    flex-direction: column;
+  }
+  
+  .super-admin-home-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .super-admin-home-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .super-admin-home-intro-content h2 {
+    font-size: 1.5rem;
+  }
+}

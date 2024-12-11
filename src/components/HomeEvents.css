@@ -1,0 +1,203 @@
+/* HomeEvents.css */
+.home-events {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+  background-color: #2f2f30;
+  color: #000000;
+  border: 1px solid #000000;
+}
+
+.thumbnails {
+  display: grid;
+  padding-left: 60px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 2rem;
+  margin-bottom: 2rem;
+  width: calc(100% - 10px);
+  /* Ensure consistent width */
+  max-width: 1500px;
+  /* Optional: limit max width */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.thumbnail {
+  width: 100%;
+  /* Ensure each thumbnail takes full grid cell width */
+  background-color: #ffffff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(255, 255, 255, 0.1);
+}
+
+.thumbnail-content {
+  position: relative;
+}
+
+.thumbnail-content img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+
+.thumbnail-content .overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 0.5rem;
+}
+
+.thumbnail-content .overlay .type {
+  background-color: #ff0202;
+  border: black 1px solid;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.thumbnail .info {
+  padding: 1rem;
+}
+
+.thumbnail .title-and-type {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.thumbnail .title {
+  font-size: 1.2rem;
+  align-items: center;
+  padding-top: 10px;
+  padding-bottom: 20px;
+}
+
+.thumbnail .type-container {
+  background-color: #000;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.thumbnail .details {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.thumbnail .details .detail {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.thumbnail .details .detail svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.location-text {
+  font-size: 14px; /* Default font size */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.location-text.small-text {
+  font-size: 12px; /* Smaller font size for text lengths between 10 and 12 */
+}
+
+
+
+
+
+.thumbnail .college {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.thumbnail .college img {
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+}
+
+.thumbnail .college span {
+  font-size: 0.9rem;
+  align-items: center;
+}
+
+.thumbnail .register {
+  background-color: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.thumbnail .register:hover {
+  background-color: #ff4b4b;
+}
+
+.see-more {
+  background-color: #ff6b6b;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.see-more:hover {
+  background-color: #ff4b4b;
+}
+
+@media (max-width: 1024px) {
+  .thumbnails {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .thumbnails {
+    grid-template-columns: 1fr;
+    padding-left: 0px !important;
+  }
+
+  .location-text {
+    font-size: 14px; /* Normal font size for mobile devices */
+    white-space: nowrap; /* Ensure text is on a single line */
+    overflow: visible; /* No truncation on mobile */
+    text-overflow: unset; /* No ellipsis on mobile */
+  }
+
+  /* If location text is longer than 9 characters, reduce font size */
+  .location-text.small-text {
+    font-size: 12px; /* Smaller font size for text with more than 9 characters */
+  }
+
+  /* If location text is longer than 12 characters, truncate it */
+  .location-text.length-more-than-12 {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 12ch; /* Limit to 12 characters */
+  }
+}

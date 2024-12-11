@@ -1,0 +1,65 @@
+.headerContainer {
+  text-align: center;
+  padding: 50px 20px;
+  background-color: #283593;
+  color: white;
+  animation: fadeIn 2s ease-in-out;
+}
+
+.headerContainer h1 {
+  font-size: 4rem; /* Larger font for bigger screens */
+  margin-bottom: 20px;
+  letter-spacing: 2px;
+  color: white;
+}
+
+.headerContainer p {
+  font-size: 1.25rem; /* Adjusted font size for better readability */
+  margin-top: 10px;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  color: white;
+}
+
+/* Fade-in effect */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 2s forwards;
+}
+
+/* Keyframes for fade-in animation */
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+  .headerContainer {
+      padding: 30px 15px; /* Reduced padding for smaller screens */
+      margin-top: 50px;
+  }
+
+  .headerContainer h1 {
+      font-size: 2.5rem; /* Smaller font for mobile */
+  }
+
+  .headerContainer p {
+      font-size: 1rem; /* Smaller paragraph text for mobile */
+      padding: 0 10px; /* Added padding for better spacing */
+  }
+}
+
+@media (max-width: 480px) {
+  .headerContainer{
+    margin-top: 50px;
+  }
+  .headerContainer h1 {
+      font-size: 2rem; /* Even smaller font for extra small screens */
+  }
+
+  .headerContainer p {
+      font-size: 0.9rem; /* Adjust paragraph text size */
+  }
+}

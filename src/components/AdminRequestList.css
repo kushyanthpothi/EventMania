@@ -1,0 +1,89 @@
+.admin-requests-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.search-bar {
+  text-align: right;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+.search-bar input {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  width: 250px;
+}
+
+.status-filter {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 37px;
+}
+
+.requests-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px; /* Space between request cards */
+}
+
+.request-card {
+  background: rgba(255, 255, 255, 0.2); /* Semi-transparent background */
+  border: 1px solid rgba(255, 255, 255, 0.3); /* Border with light transparency */
+  border-radius: 10px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  backdrop-filter: blur(10px); /* Blurs the background behind the card */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Adds a soft shadow */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.request-card:hover {
+  background-color: rgba(255, 255, 255, 0.3); /* Slightly increase opacity on hover */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Enhances shadow on hover */
+}
+
+.request-info {
+  flex-grow: 1;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 5px; /* Space between buttons */
+}
+
+.accept-btn, .reject-btn, .accepted-btn, .rejected-btn {
+  border-radius: 5px;
+  padding: 10px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.accept-btn {
+  background-color: green;
+}
+
+.reject-btn {
+  background-color: red;
+}
+
+.accepted-btn {
+  background-color: green;
+  cursor: default; /* No pointer for accepted status */
+}
+
+.rejected-btn {
+  background-color: red;
+  cursor: not-allowed; /* Indicates this button is disabled */
+}

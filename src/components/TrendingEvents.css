@@ -1,0 +1,144 @@
+.trending-events-page {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.trending-events-title {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.trending-events-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 1rem;
+}
+
+.trending-events-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    position: relative;
+}
+
+.trending-events-card:hover {
+    transform: translateY(-5px);
+}
+
+.trending-events-image-container {
+    position: relative;
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.trending-events-thumbnail {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.trending-events-card:hover .trending-events-thumbnail {
+    transform: scale(1.05);
+}
+
+.trending-events-countdown-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255, 59, 48, 0.9);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    backdrop-filter: blur(5px);
+}
+
+.trending-events-content {
+    padding: 1.5rem;
+    position: relative;
+}
+
+.trending-events-name {
+    font-size: 1.25rem;
+    color: #333;
+    margin: 0 0 1rem 0;
+    font-weight: 600;
+}
+
+.trending-events-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.trending-events-location,
+.trending-events-time {
+    color: #666;
+    font-size: 0.9rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.trending-events-arrow-button {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    color: #007AFF;
+    cursor: pointer;
+    padding: 0.5rem;
+    transition: transform 0.2s ease;
+}
+
+.trending-events-arrow-button:hover {
+    transform: translateX(5px);
+    color: none;
+}
+
+.trending-events-arrow-button svg {
+    width: 24px;
+    height: 24px;
+}
+
+.trending-events-loading {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-size: 1.2rem;
+    grid-column: 1 / -1;
+}
+
+.trending-events-empty {
+    text-align: center;
+    padding: 2rem;
+    color: #666;
+    font-size: 1.2rem;
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 768px) {
+    .trending-events-page {
+        padding: 1rem;
+    }
+
+    .trending-events-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .trending-events-image-container {
+        height: 180px;
+    }
+}
