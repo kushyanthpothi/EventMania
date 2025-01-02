@@ -9,7 +9,7 @@ import AccountDetails from "./components/AccountDetails";
 import CollegeEvents from "./components/Event";
 import EventCreation from "./components/EventCreation";
 import AdminRequests from "./components/AdminRequests";
-import AllEvents from "./components/AllEvents";
+// import AllEvents from "./components/AllEvents";
 import RegistrationDetails from "./components/RegistrationDetails";
 import CollegeEvent from "./components/CollegeEvents";
 import TrendingEvents from "./components/TrendingEvents";
@@ -27,6 +27,9 @@ import PrivateRoute from "./components/PrivateRouting";
 
 import EnhancedError404Page from "./components/Error404Page"; // Add this import
 
+
+import CompanyAuth from "./components/CompanyAuth";
+
 function AppContent() {
   const location = useLocation();
   const hideNavbarRoutes = [
@@ -34,6 +37,7 @@ function AppContent() {
     "/super-admin-requests",
     "/super-event-requests",
     "/super-event-creation",
+    // "/companylogin",  
   ];
 
   const [showPopups, setShowPopups] = React.useState(() => {
@@ -53,6 +57,11 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/companylogin" element={
+          <CompanyAuth
+            initialMode={new URLSearchParams(window.location.search).get('mode') || 'login'}
+          />
+        } />
 
         {/* Student & College Rep Routes */}
         <Route path="/dashboard" element={

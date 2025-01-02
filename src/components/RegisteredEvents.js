@@ -119,6 +119,6 @@ const RegisteredEvents = () => {
       )}
     </div>
   );
-};
+};  
 
 export default RegisteredEvents;

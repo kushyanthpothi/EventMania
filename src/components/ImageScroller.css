@@ -1,8 +1,11 @@
- /* ImageScroller.css */
 :root {
-  --scroller-background: #f4f4f8;
-  --logo-border-color: rgba(0, 0, 0, 0.05);
-  /* --scroller-shadow: rgba(0, 0, 0, 0.05); */
+  --scroller-background: #f0f4f8;
+  --accent-color: #3b82f6;
+  --item-background: #ffffff;
+  --border-color: rgba(59, 130, 246, 0.1);
+  --shadow-color: rgba(59, 130, 246, 0.08);
+  --text-color: #1f2937;
+  --hover-overlay-color: rgba(59, 130, 246, 0.8);
 }
 
 .scroller-container {
@@ -10,10 +13,11 @@
   width: 100%;
   overflow: hidden;
   background-color: var(--scroller-background);
-  box-shadow: 0 4px 6px var(--scroller-shadow);
-  /* padding: 20px 0; */
-  margin: 20px 0;
-  border-radius: 12px;
+  border-radius: 16px;
+  margin: 25px 0;
+  box-shadow: 0 10px 25px var(--shadow-color);
+  padding: 15px 0;
+  max-width: 100%;
 }
 
 .scroller {
@@ -28,105 +32,133 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 15px;
-  padding: 10px;
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px var(--logo-border-color);
-  transition: 
-    transform 0.3s ease,
+  margin: 0 20px;
+  padding: 15px;
+  background-color: var(--item-background);
+  border-radius: 12px;
+  border: 1.5px solid var(--border-color);
+  transition:
+    transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
     box-shadow 0.3s ease;
 }
 
 .scroller-item:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.08);
+  box-shadow: 0 6px 15px var(--shadow-color);
+}
+
+.logo-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .scroller-item img {
-  transition: opacity 0.3s ease;
-  filter: grayscale(100%);
-  opacity: 0.7;
+  transition:
+    transform 0.3s ease,
+    filter 0.3s ease,
+    opacity 0.3s ease;
+  filter: saturate(100%) contrast(100%);
+  opacity: 1;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.college-name-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--hover-overlay-color);
+  color: white;
+  text-align: center;
+  padding: 5px;
+  font-size: 0.8rem;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: 
+    opacity 0.3s ease,
+    transform 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 10;
+}
+
+.scroller-item:hover .college-name-overlay {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .scroller-item:hover img {
-  filter: grayscale(0%);
-  opacity: 1;
+  transform: scale(0.95);
 }
 
 /* Smooth Fade Up Animation */
-@keyframes smooth-fade-up {
+@keyframes geometric-fade-up {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: perspective(500px) rotateX(-10deg) translateY(30px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: perspective(500px) rotateX(0) translateY(0);
   }
 }
 
 .smooth-fade-up {
-  animation: smooth-fade-up 0.8s ease-out;
+  animation: geometric-fade-up 0.9s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
   .scroller-container {
     padding: 10px 0;
-    margin: 10px 0;
+    margin: 15px 0;
   }
-
+  
   .scroller-item {
-    margin: 0 10px;
-    padding: 5px;
+    margin: 0 12px;
+    padding: 10px;
+  }
+  
+  .college-name-overlay {
+    font-size: 0.7rem;
+    padding: 3px;
   }
 }
 
-/* Scrollbar Styling (Optional) */
+@media (max-width: 480px) {
+  .scroller-item {
+    margin: 0 8px;
+    padding: 5px;
+  }
+  
+  .college-name-overlay {
+    font-size: 0.6rem;
+  }
+}
+
+/* Scrollbar Styling */
 .scroller-container::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
 }
 
 .scroller-container::-webkit-scrollbar-track {
   background: var(--scroller-background);
+  border-radius: 4px;
 }
 
 .scroller-container::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border-radius: 3px;
-}
-
-@keyframes shimmer-left-to-right {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
-}
-
-.shimmer-item {
-  position: relative;
-  overflow: hidden;
-  background-color: var(--shimmer-base-color);
-  border-radius: 8px;
-}
-
-.shimmer-rectangle {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    to right, 
-    transparent 0%, 
-    var(--shimmer-highlight-color) 50%, 
-    transparent 100%
-  );
-  animation: shimmer-left-to-right 1.5s infinite linear;
+  background-color: var(--accent-color);
+  border-radius: 4px;
+  opacity: 0.7;
 }
 
 /* Overlay Gradient Effect */
@@ -136,10 +168,10 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 50px;
+  width: 60px;
   background: linear-gradient(
-    to right, 
-    var(--scroller-background), 
+    to right,
+    var(--scroller-background),
     transparent
   );
   z-index: 1;
@@ -153,4 +185,31 @@
 .scroller-container::after {
   right: 0;
   transform: rotate(180deg);
+}
+
+/* Accessibility Enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .scroller-item,
+  .scroller-item img,
+  .college-name-overlay {
+    transition: none;
+  }
+  
+  .smooth-fade-up {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (forced-colors: active) {
+  .scroller-item {
+    border: 2px solid CanvasText;
+  }
+  
+  .college-name-overlay {
+    background-color: Highlight;
+    color: HighlightText;
+  }
 }

@@ -4,6 +4,7 @@ import ImageScroller from './ImageScroller';
 import About from './About';
 import Footer from './Footer';
 import HomeEvents from './HomeEvents';
+import CompanyHome from './CompanyHome';
 import './Home.css';
 
 const Home = () => {
@@ -13,6 +14,7 @@ const Home = () => {
       <ImageScroller />
       <About id="aboutContainer" /> {/* Ensure id matches */}
       <HomeEvents /> {/* Add this component */}
+      <CompanyHome/> 
       <Footer id="footer" /> {/* Ensure id matches */}
     </div>
   );

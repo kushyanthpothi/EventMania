@@ -1,0 +1,289 @@
+.companyAuth__container {
+    min-height: 100vh;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #1a1c2c 0%, #2a3045 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .companyAuth__bgContainer {
+    position: absolute;
+    margin-top: 10%;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+    pointer-events: none;
+  }
+
+  .companyAuth__input--error {
+    border-color: #ff4444;
+}
+
+.companyAuth__error {
+    color: #ff4444;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.companyAuth__checking {
+    color: #666;
+    font-size: 0.8rem;
+    margin-top: 4px;
+}
+
+.companyAuth__inputGroup select,
+.companyAuth__inputGroup select option {
+  color: #000000;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.companyAuth__form::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.companyAuth__form {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Style the select dropdown menu scrollbar */
+select::-webkit-scrollbar {
+  display: none;
+}
+
+select {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  
+  /* Ensure text remains black even after visiting */
+  color: #000000 !important;
+}
+
+/* Ensure option text remains black in all states */
+select option {
+  color: #f9f2f2;
+  background-color: #00fdfd;
+}
+
+/* Style for visited and focused options */
+select option:checked,
+select option:focus,
+select option:active {
+  color: #f9f2f2 !important;
+  background-color: #00fdfd;
+}
+
+/* Ensure dropdown remains scrollable */
+.companyAuth__inputGroup select {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.companyAuth__button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+  
+  .companyAuth__logoRow {
+    position: absolute;
+    width: 100%;
+    height: 80px;
+    overflow: hidden;
+  }
+  
+  .companyAuth__logoRow--1 { top: 0%; }
+  .companyAuth__logoRow--2 { top: 25%; }
+  .companyAuth__logoRow--3 { top: 50%; }
+  .companyAuth__logoRow--4 { top: 75%; }
+  .companyAuth__logoRow--5 { top: 100%; }
+  
+  /* Default scroll animation for odd rows */
+  .companyAuth__logoRow:nth-child(odd) .companyAuth__logoTrack {
+    display: flex;
+    animation: slideTrackLeft 30s linear infinite;
+  }
+  
+  /* Reverse scroll animation for even rows */
+  .companyAuth__logoRow:nth-child(even) .companyAuth__logoTrack {
+    display: flex;
+    animation: slideTrackRight 30s linear infinite;
+  }
+  
+  .companyAuth__logoSet {
+    display: flex;
+    gap: 50px;
+    padding: 0 25px;
+  }
+  
+  .companyAuth__logo {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .companyAuth__logoImg {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    mix-blend-mode: screen;
+    opacity: 0.8;
+    transition: filter 0.3s ease;
+  }
+  
+  .companyAuth__logoImg:hover {
+    filter: grayscale(0) brightness(1) invert(0);
+    opacity: 1;
+  }
+  
+  /* Define both directional animations */
+  @keyframes slideTrackLeft {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+  
+  @keyframes slideTrackRight {
+    0% {
+      transform: translateX(-50%);
+    }
+    100% {
+      transform: translateX(0);
+    }
+  }
+  
+  /* Rest of the styles remain the same */
+  .companyAuth__formContainer {
+    position: relative;
+    width: 100%;
+    max-width: 450px;
+    padding: 20px;
+    z-index: 1;
+  }
+  
+  .companyAuth__form {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    transition: transform 0.3s ease;
+  }
+  
+  .companyAuth__form:hover {
+    transform: translateY(-5px);
+  }
+  
+  .companyAuth__form--register {
+    max-height: 80vh;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+  }
+  
+  .companyAuth__title {
+    color: #ffffff;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-align: center;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+  
+  .companyAuth__inputGroup {
+    margin-bottom: 20px;
+  }
+  
+  .companyAuth__input {
+    width: 100%;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #ffffff;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .companyAuth__input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
+  }
+  
+  .companyAuth__input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .companyAuth__button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+  }
+  
+  .companyAuth__button:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  }
+  
+  .companyAuth__link {
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+  }
+  
+  .companyAuth__link:hover {
+    color: #ffffff;
+    text-decoration: underline;
+  }
+  
+  /* Custom scrollbar for webkit browsers */
+  .companyAuth__form--register::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .companyAuth__form--register::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .companyAuth__form--register::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+  }
+  
+  /* Media Queries */
+  @media (max-width: 768px) {
+    .companyAuth__formContainer {
+      padding: 15px;
+    }
+    
+    .companyAuth__form {
+      padding: 30px 20px;
+    }
+    
+    .companyAuth__title {
+      font-size: 1.75rem;
+    }
+  }

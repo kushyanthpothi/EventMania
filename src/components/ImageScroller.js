@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { database } from './firebaseConfig';
-// eslint-disable-next-line
 import { ref, onValue, query } from 'firebase/database';
 import './ImageScroller.css';
 
@@ -9,32 +8,41 @@ const DynamicImageScroller = () => {
   const [isLoading, setIsLoading] = useState(true);
   const scrollerRef = useRef(null);
   const STATIC_HEIGHT = 170; // Fixed height in pixels
-  const SHIMMER_COUNT = 10; // Number of shimmer placeholders
 
   useEffect(() => {
     const fetchCollegeLogos = () => {
+      // Create refs for both Users/College and events collections
       const collegeLogosRef = ref(database, 'Users/College');
       const eventsLogosRef = ref(database, 'events');
 
+      // Combine logo fetching from both sources
       const fetchLogosFromRef = (logoRef) => {
         return new Promise((resolve) => {
           onValue(logoRef, (snapshot) => {
-            const logoUrls = [];
+            const logoData = [];
             
             snapshot.forEach((childSnapshot) => {
               const data = childSnapshot.val();
               
+              // Extract logo and college name from different possible locations
               if (data) {
                 if (data.collegeLogo) {
-                  logoUrls.push(data.collegeLogo);
+                  logoData.push({
+                    logoUrl: data.collegeLogo,
+                    collegeName: data.collegeName || 'Unknown College'
+                  });
                 }
+                // For events collection, check for event-specific logos
                 if (data.eventLogo) {
-                  logoUrls.push(data.eventLogo);
+                  logoData.push({
+                    logoUrl: data.eventLogo,
+                    collegeName: data.eventName || 'Unknown Event'
+                  });
                 }
               }
             });
 
-            resolve(logoUrls);
+            resolve(logoData);
           }, (error) => {
             console.error(`Error fetching logos from ${logoRef.toString()}:`, error);
             resolve([]);
@@ -42,13 +50,15 @@ const DynamicImageScroller = () => {
         });
       };
 
+      // Fetch logos from both sources
       Promise.all([
         fetchLogosFromRef(collegeLogosRef),
         fetchLogosFromRef(eventsLogosRef)
       ]).then(([collegeLogos, eventLogos]) => {
-        const combinedLogos = [...collegeLogos, ...eventLogos].filter(logo => logo);
+        const combinedLogos = [...collegeLogos, ...eventLogos].filter(logo => logo.logoUrl);
 
         if (combinedLogos.length > 0) {
+          // Create infinite scroll effect
           const infiniteLogos = Array(100).fill(combinedLogos).flat();
           setLogos(infiniteLogos);
         } else {
@@ -79,31 +89,16 @@ const DynamicImageScroller = () => {
     }
   }, [logos]);
 
-  const renderShimmerPlaceholders = () => {
-    return Array(SHIMMER_COUNT).fill(0).map((_, index) => (
-      <div 
-        key={`shimmer-${index}`} 
-        className="scroller-item shimmer-item"
-        style={{
-          height: `${STATIC_HEIGHT}px`,
-          width: `${STATIC_HEIGHT}px` // Make it square/rectangular
-        }}
-      >
-        <div className="shimmer-rectangle"></div>
-      </div>
-    ));
-  };
-
+  // Loading state
   if (isLoading) {
     return (
       <div className="scroller-container smooth-fade-up">
-        <div className="scroller" ref={scrollerRef}>
-          {renderShimmerPlaceholders()}
-        </div>
+        <div>Loading college logos...</div>
       </div>
     );
   }
 
+  // No logos found state
   if (logos.length === 0) {
     return (
       <div className="scroller-container smooth-fade-up">
@@ -115,7 +110,7 @@ const DynamicImageScroller = () => {
   return (
     <div className="scroller-container smooth-fade-up">
       <div className="scroller" ref={scrollerRef}>
-        {logos.map((logoUrl, index) => (
+        {logos.map((logo, index) => (
           <div 
             key={index} 
             className="scroller-item"
@@ -123,15 +118,18 @@ const DynamicImageScroller = () => {
               height: `${STATIC_HEIGHT}px`
             }}
           >
-            <img 
-              src={logoUrl} 
-              alt={`Logo ${index + 1}`} 
-              style={{
-                maxHeight: `${STATIC_HEIGHT}px`,
-                maxWidth: '100%',
-                objectFit: 'contain'
-              }}
-            />
+            <div className="logo-wrapper">
+              <img 
+                src={logo.logoUrl} 
+                alt={`${logo.collegeName} Logo`} 
+                style={{
+                  maxHeight: `${STATIC_HEIGHT}px`,
+                  maxWidth: '100%',
+                  objectFit: 'contain'
+                }}
+              />
+              <div className="college-name-overlay">{logo.collegeName}</div>
+            </div>
           </div>
         ))}
       </div>

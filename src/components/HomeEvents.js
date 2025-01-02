@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { database, auth } from './firebaseConfig';
-import { ref, onValue } from 'firebase/database';
+import { ref, onValue, off } from 'firebase/database';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './HomeEvents.css';
@@ -12,10 +12,8 @@ const HomeEvents = () => {
   const [user, setUser] = useState(null);
   const [visibleEvents, setVisibleEvents] = useState(3);
   const navigate = useNavigate();
-  // eslint-disable-next-line
   const [collegeLogos, setCollegeLogos] = useState({});
-
-
+  const [isLoading, setIsLoading] = useState(true);
 
   // Authentication State Listener
   useEffect(() => {
@@ -29,116 +27,132 @@ const HomeEvents = () => {
 
   // Fetch Events from Firebase
   useEffect(() => {
-    const fetchCollegeLogosAndEvents = () => {
-      // Fetch College Logos
-      const collegeRef = ref(database, 'Users/College/');
-      onValue(collegeRef, (snapshot) => {
-        if (snapshot.exists()) {
-          const logos = {};
-          snapshot.forEach((userSnapshot) => {
-            const collegeData = userSnapshot.val();
-            if (collegeData.collegeName && collegeData.collegeLogo) {
-              logos[collegeData.collegeName] = collegeData.collegeLogo;
-            }
-          });
-          setCollegeLogos(logos); // Update logos
+    let collegeRef, eventsRef;
 
-          // Fetch Events after updating logos
-          fetchEvents(logos);
-        } else {
-          console.error('No college logos found');
+    const fetchCollegeLogosAndEvents = () => {
+      setIsLoading(true);
+      
+      // Fetch College Logos
+      collegeRef = ref(database, 'Users/College/');
+      onValue(collegeRef, (snapshot) => {
+        try {
+          if (snapshot.exists()) {
+            const logos = {};
+            snapshot.forEach((userSnapshot) => {
+              const collegeData = userSnapshot.val();
+              if (collegeData.collegeName && collegeData.collegeLogo) {
+                logos[collegeData.collegeName] = collegeData.collegeLogo;
+              }
+            });
+            setCollegeLogos(logos);
+
+            // Fetch Events after updating logos
+            fetchEvents(logos);
+          } else {
+            console.warn('No college logos found');
+            fetchEvents({});
+          }
+        } catch (error) {
+          console.error('Error processing college logos:', error);
+          toast.error("Error loading college information");
+          setIsLoading(false);
         }
+      }, (error) => {
+        console.error('Error fetching college logos:', error);
+        toast.error("Failed to load college logos");
+        setIsLoading(false);
       });
     };
 
     const fetchEvents = (logos) => {
-      const eventsRef = ref(database, 'events');
+      eventsRef = ref(database, 'events');
       onValue(eventsRef, (snapshot) => {
-        const fetchedEvents = [];
-        snapshot.forEach((collegeSnapshot) => {
-          const collegeName = collegeSnapshot.key;
-          collegeSnapshot.forEach((eventSnapshot) => {
-            const eventData = eventSnapshot.val();
-            if (!eventData.isCollegeEvent || eventData.isCollegeEvent === "false") {
-              fetchedEvents.push({
-                ...eventData,
-                id: eventSnapshot.key,
-                collegeName: collegeName,
-                collegeLogo: logos[collegeName] || 'https://i.ibb.co/090FD9p/image.png', // Use logos from fetched data
-              });
-            }
+        try {
+          const fetchedEvents = [];
+          snapshot.forEach((collegeSnapshot) => {
+            const collegeName = collegeSnapshot.key;
+            collegeSnapshot.forEach((eventSnapshot) => {
+              const eventData = eventSnapshot.val();
+              if (!eventData.isCollegeEvent || eventData.isCollegeEvent === "false") {
+                fetchedEvents.push({
+                  ...eventData,
+                  id: eventSnapshot.key,
+                  collegeName: collegeName,
+                  collegeLogo: logos[collegeName] || 'https://i.ibb.co/090FD9p/image.png',
+                });
+              }
+            });
           });
-        });
-        fetchedEvents.sort((a, b) => (a.isCollegeEvent === false ? -1 : 1));
-        setEvents(fetchedEvents); // Update events
+
+          fetchedEvents.sort((a, b) => (a.isCollegeEvent === false ? -1 : 1));
+          setEvents(fetchedEvents);
+          setIsLoading(false);
+        } catch (error) {
+          console.error('Error processing events:', error);
+          toast.error("Error loading events");
+          setIsLoading(false);
+        }
       }, (error) => {
         console.error('Error fetching events:', error);
         toast.error("Failed to load events");
+        setIsLoading(false);
       });
     };
 
-    fetchCollegeLogosAndEvents(); // Execute the combined function
+    fetchCollegeLogosAndEvents();
+
+    // Cleanup function
+    return () => {
+      if (collegeRef) off(collegeRef);
+      if (eventsRef) off(eventsRef);
+    };
   }, []);
 
-
-  // Handle Event Click (Navigate to Description)
-  const handleEventClick = (event) => {
-    // Check if user is logged in
+  // Memoized event click handler to view event details
+  const handleEventClick = useCallback((event) => {
     if (!user) {
       toast.error("Please login to view event details", {
         position: "top-center",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
       });
       return;
     }
 
-    // Create URL-friendly event name
-    // eslint-disable-next-line
-    const eventUrlName = event.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')  // Replace non-alphanumeric characters with hyphens
-      .replace(/^-+|-+$/g, '');  // Remove leading and trailing hyphens
-
-    // Navigate to event description page
     navigate(`/event/${encodeURIComponent(event.id)}`);
-  };
+  }, [user, navigate]);
 
-  // Handle Register Button Click
-  const handleRegister = (event) => {
-    // Check if user is logged in
+  // Memoized register handler
+  const handleRegister = useCallback((event, e) => {
+    // Prevent event bubbling to avoid triggering event details view
+    e.stopPropagation();
+
     if (!user) {
       toast.error("Please login before registering", {
         position: "top-center",
         autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
       });
       return;
     }
 
-    // Create URL-friendly event name for registration
-    // eslint-disable-next-line
-    const eventUrlName = event.name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-
-    // Navigate to registration page
     navigate(`/event/${encodeURIComponent(event.id)}`);
-  };
+  }, [user, navigate]);
 
-  // Handle Show More Button
-  const handleShowMore = () => {
-    setVisibleEvents(prevVisibleEvents => prevVisibleEvents + 3);
-  };
+  // Handle Show More Button with safe increment
+  const handleShowMore = useCallback(() => {
+    setVisibleEvents((prevVisibleEvents) => 
+      Math.min(prevVisibleEvents + 3, events.length)
+    );
+  }, [events.length]);
+
+  // Render loading state
+  if (isLoading) {
+    return <div className="loading">Loading events...</div>;
+  }
+
+  // Render empty state
+  if (events.length === 0) {
+    return <div className="no-events">No events available</div>;
+  }
 
   return (
     <div className="home-events">
@@ -156,12 +170,12 @@ const HomeEvents = () => {
       <div className="thumbnails">
         {events.slice(0, visibleEvents).map((event, index) => (
           <div
-            key={index}
+            key={event.id || index}
             className="thumbnail"
-            
+            onClick={() => handleEventClick(event)}
           >
             <div className="thumbnail-content">
-              <img src={event.thumbnail} alt={event.title} />
+              <img src={event.thumbnail} alt={event.name} />
               <div className="overlay">
                 <div className="type">
                   {!event.category || event.category.trim() === ''
@@ -200,14 +214,10 @@ const HomeEvents = () => {
               </div>
               <button
                 className="register"
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent thumbnail click when registering
-                  handleRegister(event);
-                }}
+                onClick={(e) => handleRegister(event, e)}
               >
                 Register
               </button>
-
             </div>
           </div>
         ))}

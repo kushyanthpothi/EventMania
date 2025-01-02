@@ -1,14 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ref, set, get, remove, update } from 'firebase/database';
+import { ref, set, get, remove } from 'firebase/database';
 import { database, auth } from './firebaseConfig';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getEventNameSuggestions, generateEventDescription } from './geminiService';
+import { Check, RefreshCw } from 'lucide-react';
 import './EventCreation.css';
+// import { GoogleGenerativeAI } from "@google/generative-ai";
+
 
 const EventCreation = () => {
   const [view, setView] = useState('creation');
   const [editMode, setEditMode] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const suggestionsRef = useRef(null);
+  const [aiMode, setAiMode] = useState(false);
+  const [inputDescription, setInputDescription] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingDesc, setIsGeneratingDesc] = useState(false);
+  const [aiDescMode, setAiDescMode] = useState(false);
+  const [tempDescription, setTempDescription] = useState('');
+  const [showRegenerateDesc, setShowRegenerateDesc] = useState(false);
+  const [descGenerated, setDescGenerated] = useState(false);
+  const [savedPrompt, setSavedPrompt] = useState('');
   const [originalEventName, setOriginalEventName] = useState(null);
   const [eventData, setEventData] = useState({
     eventName: '',
@@ -26,6 +42,8 @@ const EventCreation = () => {
   const [loading, setLoading] = useState(false);
   const [collegeName, setCollegeName] = useState(null);
   const imgbbApiKey = '24a158e16943c30a375e4a1d261051a8';
+  // const genAI = new GoogleGenerativeAI("AIzaSyD_xI_TNAXLeI2IloqvVnfIeDu7mNk0Cc8");
+  // const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
   // Fetch college name on auth state change
   useEffect(() => {
@@ -38,6 +56,21 @@ const EventCreation = () => {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+
 
   // Fetch events when college name is available
   useEffect(() => {
@@ -61,6 +94,182 @@ const EventCreation = () => {
     }
   };
 
+  const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+
+  const handleGenerateDescription = async () => {
+    if (!tempDescription.trim() || isGeneratingDesc) return;
+    
+    setIsGeneratingDesc(true);
+    try {
+      // Save the prompt before generating description
+      setSavedPrompt(tempDescription);
+      const description = await generateEventDescription(tempDescription);
+      setEventData(prev => ({
+        ...prev,
+        description
+      }));
+      setDescGenerated(true);
+      setShowRegenerateDesc(true);
+    } catch (error) {
+      console.error('Error generating description:', error);
+      toast.error('Failed to generate description');
+    } finally {
+      setIsGeneratingDesc(false);
+    }
+  };
+
+  const handleRegenerateDescription = async () => {
+    setIsGeneratingDesc(true);
+    try {
+      // Use the saved prompt instead of tempDescription
+      const description = await generateEventDescription(savedPrompt);
+      setEventData(prev => ({
+        ...prev,
+        description
+      }));
+      setDescGenerated(true);
+    } catch (error) {
+      console.error('Error regenerating description:', error);
+      toast.error('Failed to regenerate description');
+    } finally {
+      setIsGeneratingDesc(false);
+    }
+  };
+
+  const handleDescriptionKeyPress = (e) => {
+    if (e.key === 'Enter' && aiDescMode) {
+      e.preventDefault();
+      handleGenerateDescription();
+    }
+  };
+
+  const renderDescriptionInput = () => (
+    <motion.div className="form-group event-name-container" >
+      {/* <div className="description-input-container" > */}
+      <input
+          type="text"
+          name="description"
+          placeholder={aiDescMode ? "Enter a brief description of your event to generate a detailed one" : "Event Description"}
+          value={aiDescMode ? (descGenerated ? eventData.description : tempDescription) : eventData.description}
+          onChange={(e) => {
+            if (aiDescMode && !descGenerated) {
+              setTempDescription(e.target.value);
+            } else if (!aiDescMode) {
+              handleInputChange(e);
+            }
+          }}
+          onKeyPress={handleDescriptionKeyPress}
+          required
+          className={`description-input expanded-input ${aiDescMode ? 'ai-mode-active' : ''}`}
+          readOnly={aiDescMode && descGenerated}
+        />
+        
+        <div className="description-button-group">
+          {aiDescMode && (
+            <>
+              {descGenerated ? (
+                <button
+                  className="check-button"
+                  onClick={() => {
+                    setAiDescMode(false);
+                    setShowRegenerateDesc(false);
+                    setDescGenerated(false);
+                    setTempDescription('');
+                    setSavedPrompt('');
+                  }}
+                >
+                  <Check className="w-4 h-4" />
+                </button>
+              ) : (
+                <button
+                  className={`arrow-button ${tempDescription.length > 0 ? 'active' : ''}`}
+                  onClick={() => {
+                    if (tempDescription.length > 0 && !isGeneratingDesc) {
+                      handleGenerateDescription();
+                    }
+                  }}
+                  disabled={tempDescription.length === 0 || isGeneratingDesc}
+                >
+                  {isGeneratingDesc ? (
+                    <div className="arrow-spinner" />
+                  ) : (
+                    '➜'
+                  )}
+                </button>
+              )}
+            </>
+          )}
+          
+          <button
+            className="ai-logo-button"
+            onClick={() => {
+              setAiDescMode(!aiDescMode);
+              if (!aiDescMode) {
+                setTempDescription('');
+                setSavedPrompt('');
+                setDescGenerated(false);
+                setShowRegenerateDesc(false);
+              }
+            }}
+            disabled={isGeneratingDesc}
+          >
+            <img src="https://i.ibb.co/b7HX4kz/AI-Logo.png" alt="AI" />
+          </button>
+        </div>
+        
+        {showRegenerateDesc && (
+          <div className="regenerate-container">
+            <div className="saved-prompt">
+              <small>Original prompt: {savedPrompt}</small>
+            </div>
+            <button
+              className="regenerate-button"
+              onClick={handleRegenerateDescription}
+              disabled={isGeneratingDesc}
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Regenerate
+            </button>
+          </div>
+        )}
+      {/* </div> */}
+    </motion.div>
+  );
+
+  const generateAISuggestions = async (description) => {
+    if (!description.trim() || isGenerating) return;
+    
+    setIsGenerating(true);
+    setShowSuggestions(true);
+    
+    try {
+      const suggestions = await getEventNameSuggestions(description);
+      setSuggestions(suggestions);
+    } catch (error) {
+      console.error('Error generating suggestions:', error);
+      setSuggestions([]);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && aiMode) {
+      e.preventDefault(); // Prevent form submission
+      generateAISuggestions(inputDescription);
+    }
+  };
+
   const fetchEvents = async () => {
     if (collegeName) {
       const eventsRef = ref(database, `events/${collegeName}`);
@@ -73,7 +282,7 @@ const EventCreation = () => {
         ]);
         const eventsData = eventsSnapshot.exists() ? eventsSnapshot.val() : {};
         const requestsData = requestsSnapshot.exists() ? requestsSnapshot.val() : {};
-  
+
         const eventsArray = [
           ...Object.keys(eventsData).map((eventKey) => ({
             id: eventKey,
@@ -99,6 +308,20 @@ const EventCreation = () => {
     }
   };
 
+  const getGeminiSuggestions = async (input) => {
+    setIsGenerating(true);
+    try {
+      const suggestions = await getEventNameSuggestions(input);
+      setSuggestions(suggestions);
+      setShowSuggestions(true);
+    } catch (error) {
+      console.error('Error getting AI suggestions:', error);
+      setSuggestions([]);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const handleThumbnailUpload = async (file) => {
     if (!file) return null;
     const formData = new FormData();
@@ -112,6 +335,8 @@ const EventCreation = () => {
     }
   };
 
+  const debouncedGetSuggestions = debounce(getGeminiSuggestions, 300);
+
   const handleInputChange = (e) => {
     const { name, value, type, checked, files } = e.target;
     if (name === 'hasTeamLeader') {
@@ -122,6 +347,15 @@ const EventCreation = () => {
         teamCount: checked ? prev.teamCount : ''
       }));
       return;
+    }
+
+    if (name === 'eventName') {
+      if (value.trim().length >= 3) { // Only get suggestions if input is 3 or more characters
+        debouncedGetSuggestions(value);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
     }
 
     if (name === 'teamCount') {
@@ -139,6 +373,54 @@ const EventCreation = () => {
       [name]: type === 'checkbox' ? checked :
         type === 'file' ? files[0] : value
     }));
+  };
+
+  const handleSuggestionClick = (suggestion) => {
+    setEventData(prev => ({
+      ...prev,
+      eventName: suggestion
+    }));
+    setShowSuggestions(false);
+    setAiMode(false);
+    setInputDescription('');
+  };
+
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+
+  const generateSuggestions = (input) => {
+    if (!input.trim()) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    const commonEventTypes = [
+      'Workshop on', 'Seminar on', 'Conference on', 'Training in',
+      'Hackathon', 'Competition', 'Symposium on', 'Tech Talk on',
+      'Webinar on', 'Meeting about'
+    ];
+
+    const suggestedEvents = commonEventTypes
+      .map(type => `${type} ${input}`)
+      .filter(suggestion =>
+        suggestion.toLowerCase().includes(input.toLowerCase()) ||
+        input.toLowerCase().includes(suggestion.toLowerCase())
+      );
+
+    const techEvents = [
+      `${input} Programming Workshop`,
+      `${input} Development Training`,
+      `${input} Technology Summit`,
+      `Advanced ${input} Techniques`,
+      `${input} Masterclass`
+    ];
+
+    const allSuggestions = [...suggestedEvents, ...techEvents]
+      .filter(suggestion => suggestion.toLowerCase().includes(input.toLowerCase()))
+      .slice(0, 5); // Limit to 5 suggestions
+
+    setSuggestions(allSuggestions);
+    setShowSuggestions(true);
   };
 
   const handleCreateEvent = async (e) => {
@@ -207,11 +489,11 @@ const EventCreation = () => {
   const handleEditSubmit = async () => {
     try {
       let thumbnailUrl = null;
-  
+
       if (eventData.thumbnail instanceof File) {
         thumbnailUrl = await handleThumbnailUpload(eventData.thumbnail);
       }
-  
+
       const updatedEvent = {
         name: eventData.eventName,
         category: eventData.eventCategory,
@@ -227,18 +509,18 @@ const EventCreation = () => {
           teamCount: eventData.teamCount
         } : {})
       };
-  
+
       // If it's a college event or was approved from a request
       if (eventData.isCollegeEvent) {
         // Remove from AdminEventRequest if it exists
         const requestRef = ref(database, `AdminEventRequest/${collegeName}/${originalEventName}`);
         await remove(requestRef);
       }
-  
+
       const eventPath = `events/${collegeName}/${eventData.eventName}`;
       const eventRef = ref(database, eventPath);
       await set(eventRef, updatedEvent);
-  
+
       fetchEvents();
       toast.success('Event updated successfully!');
       resetForm();
@@ -252,19 +534,93 @@ const EventCreation = () => {
   const renderEventNameInput = () => {
     return (
       <motion.div
-        className="form-group"
+        className="form-group event-name-container"
         whileFocus={{ scale: 1.02 }}
+        ref={suggestionsRef}
       >
-        <input
-          type="text"
-          name="eventName"
-          placeholder="Event Name"
-          value={eventData.eventName}
-          onChange={handleInputChange}
-          required
-          readOnly={editMode}  // Add this line to make it read-only in edit mode
-          className={editMode ? 'read-only-input' : ''}  // Optional: add a style for read-only state
-        />
+        <div className="event-name-input-container">
+          <input
+            type="text"
+            name="eventName"
+            placeholder={aiMode ? "Describe your event to generate titles" : "Event Name"}
+            value={aiMode ? inputDescription : eventData.eventName}
+            onChange={(e) => {
+              if (aiMode) {
+                setInputDescription(e.target.value);
+              } else {
+                handleInputChange(e);
+              }
+            }}
+            onKeyPress={handleKeyPress}
+            required
+            readOnly={editMode}
+            className={`event-name-input ${editMode ? 'read-only-input' : ''} ${aiMode ? 'ai-mode-active' : ''}`}
+          />
+          
+          <div className="button-group">
+          {aiMode && (
+            <button
+              className={`arrow-button ${inputDescription.length > 0 ? 'active' : ''}`}
+              onClick={() => {
+                if (inputDescription.length > 0 && !isGenerating) {
+                  generateAISuggestions(inputDescription);
+                }
+              }}
+              disabled={inputDescription.length === 0 || isGenerating}
+            >
+              {isGenerating ? (
+                <div className="arrow-spinner" />
+              ) : (
+                '➜'
+              )}
+            </button>
+          )}
+          
+          <button
+            className="ai-logo-button"
+            onClick={() => {
+              setAiMode(!aiMode);
+              if (!aiMode) {
+                setInputDescription('');
+                setSuggestions([]);
+                setShowSuggestions(false);
+              }
+            }}
+            disabled={isGenerating}
+          >
+            <img src="https://i.ibb.co/b7HX4kz/AI-Logo.png" alt="AI" />
+          </button>
+        </div>
+        </div>
+  
+        {showSuggestions && !editMode && (
+          <div className="suggestions-container">
+            {isGenerating ? (
+              <div className="suggestion-item loading" style={{marginTop: '0.1rem'}}>
+                Generating...
+              </div>
+            ) : suggestions.length > 0 ? (
+              suggestions.map((suggestion, index) => (
+                <div
+                  key={index}
+                  className="suggestion-item"
+                  onClick={() => {
+                    handleSuggestionClick(suggestion);
+                    setAiMode(false);
+                    setInputDescription('');
+                  }}
+                >
+                  {suggestion}
+                </div>
+              ))
+            ) : (
+              <div className="suggestion-item no-results">
+                No suggestions found
+              </div>
+            )}
+          </div>
+        )}
+        
         {editMode && (
           <small className="edit-name-note">
             Event name cannot be changed after creation
@@ -533,13 +889,7 @@ const EventCreation = () => {
                   className="form-group"
                   whileFocus={{ scale: 1.02 }}
                 >
-                  <textarea
-                    name="description"
-                    placeholder="Event Description"
-                    value={eventData.description}
-                    onChange={handleInputChange}
-                    required
-                  />
+                  {renderDescriptionInput()}
                 </motion.div>
 
                 <div className="form-row toggle-switches">
@@ -558,46 +908,46 @@ const EventCreation = () => {
                     </label>
                   </div>
 
-                    <div className="form-group checkbox-container">
-                      <label className="form-group switch-container">
-                        <span>Teams</span>
-                        <input
-                          type="checkbox"
-                          name="hasTeamLeader"
-                          id="hasTeamLeader"
-                          checked={eventData.hasTeamLeader}
-                          onChange={handleInputChange}
-                          className="switch-input"
-                        />
-                        <span className="slider"></span>
-                      </label>
-                    </div>
+                  <div className="form-group checkbox-container">
+                    <label className="form-group switch-container">
+                      <span>Teams</span>
+                      <input
+                        type="checkbox"
+                        name="hasTeamLeader"
+                        id="hasTeamLeader"
+                        checked={eventData.hasTeamLeader}
+                        onChange={handleInputChange}
+                        className="switch-input"
+                      />
+                      <span className="slider"></span>
+                    </label>
+                  </div>
 
-                    {eventData.hasTeamLeader && (
-                      <motion.div
-                        className="form-group team-leader-contact"
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <input
-                          type="tel"
-                          name="teamCount"
-                          placeholder="Team Count"
-                          value={eventData.teamCount}
-                          onChange={handleInputChange}
-                          pattern="[1-9]*"
-                          maxLength="10"
-                          required={eventData.hasTeamLeader}
-                        />
-                      </motion.div>
-                    )}
-                    </div>
-                  
-                    {renderThumbnailInput()}
+                  {eventData.hasTeamLeader && (
+                    <motion.div
+                      className="form-group team-leader-contact"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <input
+                        type="tel"
+                        name="teamCount"
+                        placeholder="Team Count"
+                        value={eventData.teamCount}
+                        onChange={handleInputChange}
+                        pattern="[1-9]*"
+                        maxLength="10"
+                        required={eventData.hasTeamLeader}
+                      />
+                    </motion.div>
+                  )}
+                </div>
 
-{renderSubmitButton()}
-                
+                {renderThumbnailInput()}
+
+                {renderSubmitButton()}
+
               </motion.form>
             </div>
           </motion.div>
@@ -623,7 +973,7 @@ const EventCreation = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3 }}
                   >
-                    <div className="event-card-header">
+                    <div className="event-card-header-1">
                       <h3>{event.name}</h3>
                       <span className="event-category">{event.category}</span>
                     </div>
@@ -639,7 +989,7 @@ const EventCreation = () => {
                         <p><strong>Location:</strong> {event.location}</p>
                         <p><strong>Description:</strong> {event.description}</p>
                         <p><strong>Team Count:</strong> {event.teamCount || '-'}</p>
-                      
+
                       </div>
                     </div>
                     {event.canEdit && (

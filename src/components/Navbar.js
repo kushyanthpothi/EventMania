@@ -1,24 +1,60 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link as ScrollLink,scroller } from 'react-scroll';
-import { Link } from 'react-router-dom'; // Use this for routing to the Dashboard page
+import { Link as ScrollLink, scroller } from 'react-scroll';
+import { Link } from 'react-router-dom';
 import { auth, database } from './firebaseConfig';
-import { ref, onValue } from 'firebase/database';
+import { IoNotifications, IoClose } from "react-icons/io5";
+import { ref, onValue, remove, get } from 'firebase/database';
+import { BiBell } from "react-icons/bi";
 import './Navbar.css';
 import Login from './Login';
 import { useNavigate, useLocation } from 'react-router-dom';
 
+
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [isLoadingNotifications, setIsLoadingNotifications] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [user, setUser] = useState(null);
   const [userDetails, setUserDetails] = useState(null);
   const location = useLocation();
   const [profileImage, setProfileImage] = useState(null); // State to store profile image
   const sidebarRef = useRef(null); // Ref for the sidebar to detect clicks outside
+  const [showNotifications, setShowNotifications] = useState(false);
+
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
+  };
+
+  const toggleNotifications = () => {
+    if (!showNotifications) {
+      setIsOpen(true);
+      setTimeout(() => {
+        setShowNotifications(true);
+      }, 500);
+    } else {
+      setShowNotifications(false);
+    }
+  };
+
+
+  const removeNotification = async (notificationId) => {
+    if (!user) return;
+
+    try {
+      const notificationRef = ref(database, `Users/Students/${user.uid}/notifications/${notificationId}`);
+      await remove(notificationRef);
+
+      // No need to manually update state as the onValue listener will handle it
+
+      if (notifications.length <= 1) {
+        setShowNotifications(false);
+      }
+    } catch (error) {
+      console.error('Error removing notification:', error);
+    }
   };
 
   const handleResize = () => {
@@ -30,6 +66,63 @@ const Navbar = () => {
       setIsOpen(false); // Close the sidebar if clicked outside
     }
   };
+
+  useEffect(() => {
+    let notificationsRef;
+    let unsubscribe;
+
+    const fetchNotifications = async (currentUser) => {
+      if (!currentUser) {
+        setNotifications([]);
+        setIsLoadingNotifications(false);
+        return;
+      }
+
+      try {
+        // Check if user is a student
+        const studentRef = ref(database, `Users/Students/${currentUser.uid}`);
+        const studentSnapshot = await get(studentRef);
+
+        if (studentSnapshot.exists() && studentSnapshot.val().email === currentUser.email) {
+          // Set up real-time listener for notifications
+          notificationsRef = ref(database, `Users/Students/${currentUser.uid}/notifications`);
+          unsubscribe = onValue(notificationsRef, (snapshot) => {
+            if (snapshot.exists()) {
+              const notificationsData = snapshot.val();
+              const notificationsArray = Object.entries(notificationsData).map(([timestamp, notification]) => ({
+                id: timestamp,
+                title: notification.eventName,
+                description: notification.message,
+                image: notification.eventThumbnail || 'https://i.ibb.co/vX6LtBV/Event-Mania-1.png',
+                timestamp: notification.timestamp
+              }));
+
+              // Sort notifications by timestamp, most recent first
+              notificationsArray.sort((a, b) => b.timestamp - a.timestamp);
+
+              setNotifications(notificationsArray);
+            } else {
+              setNotifications([]);
+            }
+            setIsLoadingNotifications(false);
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        setIsLoadingNotifications(false);
+      }
+    };
+
+    if (user) {
+      fetchNotifications(user);
+    }
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, [user]);
 
   useEffect(() => {
     handleResize();
@@ -61,7 +154,7 @@ const Navbar = () => {
             });
             setProfileImage(studentData.profileImg || 'https://i.ibb.co/vX6LtBV/Event-Mania-1.png'); // Set default image if not present
           }
-        },[location]);
+        }, [location]);
 
         // Fetch college representative details
         const collegeRef = ref(database, `Users/College/${currentUser.uid}`);
@@ -119,99 +212,153 @@ const Navbar = () => {
       {!isMobile && (
         <div ref={sidebarRef} className={`sidebar ${isOpen ? 'open' : ''}`}>
           <div className="logo-details">
-            <i className='fa-solid fa-e icon'></i>
-            <div className="logo_name">EventMania</div>
-            <i className='bx bx-menu' id="btn" onClick={toggleSidebar}></i>
-          </div>
-          <ul className="nav-list">
-            <li>
-              <ScrollLink to="headerContainer" smooth={true} duration={500}>
-                <Link to="/">
-                  <i className='bx bx-home-alt'></i>
-                  <span className="links_name">Home</span>
-                </Link>
-              </ScrollLink>
-              <span className="tooltip">Home</span>
-            </li>
-            <li>
-              {location.pathname === '/' ? (
-                <ScrollLink to="aboutContainer" smooth={true} duration={500}>
-                  <i className='bx bx-user'></i>
-                  <span className="links_name">About Us</span>
-                </ScrollLink>
-              ) : (
-                <Link to="/" state={{ scrollTo: 'aboutContainer' }}>
-                  <i className='bx bx-user'></i>
-                  <span className="links_name">About Us</span>
-                </Link>
-              )}
-              <span className="tooltip">About Us</span>
-            </li>
-            <li>
-              {location.pathname === '/' ? (
-                <ScrollLink to="footer" smooth={true} duration={500}>
-                  <i className='bx bx-envelope'></i>
-                  <span className="links_name">Contact Us</span>
-                </ScrollLink>
-              ) : (
-                <Link to="/" state={{ scrollTo: 'footer' }}>
-                  <i className='bx bx-envelope'></i>
-                  <span className="links_name">Contact Us</span>
-                </Link>
-              )}
-              <span className="tooltip">Contact us</span>
-            </li>
-
-            {/* Conditional rendering based on user authentication */}
-            {!user ? (
-              // eslint-disable-next-line
-              <li>
-                
-                <a className="login-link" onClick={handleLoginClick}>
-                  <i className='bx bx-log-in'></i>
-                  <span className="links_name">Login</span>
-                </a>
-                <span className="tooltip">Login</span>
-              </li>
+            {!showNotifications ? (
+              <>
+                <i className='fa-solid fa-e icon'></i>
+                <div className="logo_name">EventMania</div>
+                <i className='bx bx-menu' id="btn" onClick={toggleSidebar}></i>
+              </>
             ) : (
               <>
-                {/* Dashboard Button */}
-                <li>
-                  <Link to={userDetails && userDetails.role === 'clg-representative' ? "/dashboard" : "/dashboard"}>
-                    <i className='bx bxs-dashboard'></i>
-                    <span className="links_name">
-                      {userDetails && userDetails.role === 'clg-representative' ? 'Admin Dashboard' : 'Dashboard'}
-                    </span>
-                  </Link>
-                  <span className="tooltip">
-                    {userDetails && userDetails.role === 'clg-representative' ? 'Admin Dashboard' : 'Dashboard'}
-                  </span>
-                </li>
-
-                {/* Profile Section */}
-                <li className="profile">
-                  <div className="profile-details">
-                    <img src={profileImage} alt="profileImg" /> {/* Display the profile image */}
-                    <div className="name_job">
-                      <div className="name">
-                        {userDetails ? (
-                          userDetails.role === 'student'
-                            ? userDetails.fullname
-                            : userDetails.role === 'clg-representative'
-                              ? userDetails.facultyName || 'User'
-                              : 'User'
-                        ) : 'User'}
-                      </div>
-                      <div className="job">
-                        {userDetails ? (userDetails.role === 'clg-representative' ? 'College Representative' : userDetails.role) : 'Guest'}
-                      </div>
-                    </div>
-                  </div>
-                  <i className='bx bx-log-out' id="log_out" onClick={handleLogout} style={{ cursor: 'pointer' }}></i>
-                </li>
+                <i className='bx bx-bell icon'></i>
+                <div className="logo_name">Notifications</div>
+                <i className='bx bx-x' id="btn" onClick={() => setShowNotifications(false)}></i>
               </>
             )}
-          </ul>
+          </div>
+
+          {!showNotifications ? (
+            <ul className="nav-list">
+              <li>
+                <ScrollLink to="headerContainer" smooth={true} duration={500}>
+                  <Link to="/">
+                    <i className='bx bx-home-alt'></i>
+                    <span className="links_name">Home</span>
+                  </Link>
+                </ScrollLink>
+                <span className="tooltip">Home</span>
+              </li>
+              <li>
+                {location.pathname === '/' ? (
+                  <ScrollLink to="aboutContainer" smooth={true} duration={500}>
+                    <i className='bx bx-user'></i>
+                    <span className="links_name">About Us</span>
+                  </ScrollLink>
+                ) : (
+                  <Link to="/" state={{ scrollTo: 'aboutContainer' }}>
+                    <i className='bx bx-user'></i>
+                    <span className="links_name">About Us</span>
+                  </Link>
+                )}
+                <span className="tooltip">About Us</span>
+              </li>
+              <li>
+                {location.pathname === '/' ? (
+                  <ScrollLink to="footer" smooth={true} duration={500}>
+                    <i className='bx bx-envelope'></i>
+                    <span className="links_name">Contact Us</span>
+                  </ScrollLink>
+                ) : (
+                  <Link to="/" state={{ scrollTo: 'footer' }}>
+                    <i className='bx bx-envelope'></i>
+                    <span className="links_name">Contact Us</span>
+                  </Link>
+                )}
+                <span className="tooltip">Contact us</span>
+              </li>
+
+              {/* Conditional rendering based on user authentication */}
+              {!user ? (
+                // eslint-disable-next-line
+                <li>
+
+                  <a className="login-link" onClick={handleLoginClick}>
+                    <i className='bx bx-log-in'></i>
+                    <span className="links_name">Login</span>
+                  </a>
+                  <span className="tooltip">Login</span>
+                </li>
+              ) : (
+                <>
+                  {/* Dashboard Button */}
+                  <li>
+                    <Link to={userDetails && userDetails.role === 'clg-representative' ? "/dashboard" : "/dashboard"}>
+                      <i className='bx bxs-dashboard'></i>
+                      <span className="links_name">
+                        {userDetails && userDetails.role === 'clg-representative' ? 'Admin Dashboard' : 'Dashboard'}
+                      </span>
+                    </Link>
+                    <span className="tooltip">
+                      {userDetails && userDetails.role === 'clg-representative' ? 'Admin Dashboard' : 'Dashboard'}
+                    </span>
+                  </li>
+                  <li>
+                    <Link to="#" onClick={toggleNotifications}>
+                      <i className='bx bx-bell'></i>
+                      <span className="links_name">Notifications</span>
+                      {notifications.length > 0 && (
+                        <span className="notification-count">{notifications.length}</span>
+                      )}
+                    </Link>
+                    <span className="tooltip">Notifications</span>
+                  </li>
+
+                  {/* Profile Section */}
+                  <li className="profile">
+                    <div className="profile-details">
+                      <img src={profileImage} alt="profileImg" /> {/* Display the profile image */}
+                      <div className="name_job">
+                        <div className="name">
+                          {userDetails ? (
+                            userDetails.role === 'student'
+                              ? userDetails.fullname
+                              : userDetails.role === 'clg-representative'
+                                ? userDetails.facultyName || 'User'
+                                : 'User'
+                          ) : 'User'}
+                        </div>
+                        <div className="job">
+                          {userDetails ? (userDetails.role === 'clg-representative' ? 'College Representative' : userDetails.role) : 'Guest'}
+                        </div>
+                      </div>
+                    </div>
+                    <i className='bx bx-log-out' id="log_out" onClick={handleLogout} style={{ cursor: 'pointer' }}></i>
+                  </li>
+                </>
+              )}
+            </ul>
+          ) : (
+            <div className="notifications-container">
+              {isLoadingNotifications ? (
+                <div className="loading-notifications">
+                  <p>Loading notifications...</p>
+                </div>
+              ) : notifications.length > 0 ? (
+                notifications.map(notification => (
+                  <div key={notification.id} className="notification-item">
+                    <img src={notification.image} alt="" />
+                    <div className="notification-content">
+                      <div className="notification-header">
+                        <h4>{notification.title}</h4>
+                      </div>
+                      <i
+                        className='bx bx-x notification-close'
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeNotification(notification.id);
+                        }}
+                      ></i>
+                      <p>{notification.description}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="no-notifications">
+                  <p>No notifications available</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       )}
 
