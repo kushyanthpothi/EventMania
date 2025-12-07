@@ -81,7 +81,7 @@ export default function AboutPage() {
             <Header />
             <main className="flex-grow">
                 {/* Hero Section */}
-                <section className="relative overflow-hidden py-20 lg:py-32">
+                <section className="relative overflow-hidden pt-36 pb-20 lg:pb-32">
                     {/* Background Gradient */}
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 via-purple-600/10 to-pink-600/20 pointer-events-none" />
                     <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-500/30 rounded-full blur-3xl" />
@@ -177,8 +177,12 @@ export default function AboutPage() {
 
                 {/* Team Section */}
                 <section className="py-20 relative overflow-hidden">
-                    <div className="absolute top-1/2 left-0 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2" />
-                    <div className="absolute top-1/2 right-0 w-72 h-72 bg-purple-500/20 rounded-full blur-3xl -translate-y-1/2" />
+                    {/* Animated background elements */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        <div className="absolute top-20 left-10 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" />
+                        <div className="absolute bottom-20 right-10 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+                    </div>
 
                     <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <motion.div
@@ -186,43 +190,105 @@ export default function AboutPage() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5 }}
-                            className="text-center mb-16"
+                            className="text-center mb-20"
                         >
-                            <h2 className="text-3xl md:text-4xl font-bold text-theme mb-4">
-                                Meet Our Team
+                            <span className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium mb-4">
+                                👥 Our Amazing Team
+                            </span>
+                            <h2 className="text-4xl md:text-5xl font-extrabold text-theme mb-6">
+                                Meet The Creators
                             </h2>
                             <p className="text-lg text-theme-secondary max-w-2xl mx-auto">
-                                The passionate minds behind Event Mania, working together to revolutionize campus events.
+                                Talented individuals united by passion, innovation, and the drive to transform campus events.
                             </p>
                         </motion.div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                        {/* Bento Grid Layout */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
                             {teamMembers.map((member, index) => (
                                 <motion.div
                                     key={index}
-                                    initial={{ opacity: 0, y: 30 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
+                                    initial={{ opacity: 0, y: 40, scale: 0.9 }}
+                                    whileInView={{ opacity: 1, y: 0, scale: 1 }}
                                     viewport={{ once: true }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
-                                    className="group"
+                                    transition={{
+                                        duration: 0.6,
+                                        delay: index * 0.1,
+                                        type: "spring",
+                                        stiffness: 100
+                                    }}
+                                    className="group relative"
                                 >
-                                    <div className="relative card-theme rounded-2xl p-6 text-center overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl">
-                                        {/* Gradient overlay on hover */}
-                                        <div className={`absolute inset-0 bg-gradient-to-br ${member.gradient} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-
-                                        {/* Icon */}
-                                        <div className={`w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br ${member.gradient} flex items-center justify-center text-3xl shadow-lg`}>
-                                            {member.icon}
+                                    {/* Card container */}
+                                    <div className="relative h-full card-theme rounded-3xl overflow-hidden border border-white/10 hover:border-white/20 transition-all duration-500">
+                                        {/* Animated gradient border effect */}
+                                        <div className={`absolute inset-0 bg-gradient-to-br ${member.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}>
+                                            <div className="absolute inset-[2px] card-theme rounded-3xl" />
                                         </div>
 
-                                        {/* Info */}
-                                        <h3 className="text-lg font-bold text-theme mb-1">{member.name}</h3>
-                                        <p className={`text-sm font-semibold bg-gradient-to-r ${member.gradient} text-transparent bg-clip-text mb-3`}>
-                                            {member.role}
-                                        </p>
-                                        <p className="text-sm text-theme-secondary">
-                                            {member.description}
-                                        </p>
+                                        {/* Content */}
+                                        <div className="relative p-8 flex flex-col items-center text-center h-full">
+                                            {/* Hexagonal avatar container */}
+                                            <motion.div
+                                                className="relative mb-6"
+                                                whileHover={{ rotate: 360, scale: 1.1 }}
+                                                transition={{ duration: 0.8, type: "spring" }}
+                                            >
+                                                {/* Outer glow ring */}
+                                                <div className={`absolute -inset-4 bg-gradient-to-br ${member.gradient} rounded-full blur-xl opacity-40 group-hover:opacity-70 transition-opacity duration-500`} />
+
+                                                {/* Rotating border */}
+                                                <div className="relative">
+                                                    <div className={`absolute inset-0 bg-gradient-to-br ${member.gradient} rounded-full animate-spin`} style={{ animationDuration: '3s' }} />
+                                                    <div className="absolute inset-[3px] card-theme rounded-full" />
+
+                                                    {/* Avatar */}
+                                                    <div className={`relative w-28 h-28 rounded-full bg-gradient-to-br ${member.gradient} flex items-center justify-center text-5xl shadow-2xl`}>
+                                                        {member.icon}
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+
+                                            {/* Name */}
+                                            <h3 className="text-2xl font-bold text-theme mb-2 group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400 group-hover:bg-clip-text group-hover:text-transparent transition-all duration-300">
+                                                {member.name}
+                                            </h3>
+
+                                            {/* Role with animated underline */}
+                                            <div className="relative mb-4">
+                                                <p className={`text-base font-semibold bg-gradient-to-r ${member.gradient} text-transparent bg-clip-text`}>
+                                                    {member.role}
+                                                </p>
+                                                <div className={`h-0.5 bg-gradient-to-r ${member.gradient} mt-2 w-0 group-hover:w-full transition-all duration-500 mx-auto`} />
+                                            </div>
+
+                                            {/* Description */}
+                                            <p className="text-sm text-theme-secondary leading-relaxed flex-grow">
+                                                {member.description}
+                                            </p>
+
+                                            {/* Decorative dots */}
+                                            <div className="flex gap-1.5 mt-6">
+                                                {[...Array(3)].map((_, i) => (
+                                                    <motion.div
+                                                        key={i}
+                                                        className={`w-2 h-2 rounded-full bg-gradient-to-r ${member.gradient}`}
+                                                        animate={{
+                                                            scale: [1, 1.2, 1],
+                                                            opacity: [0.5, 1, 0.5]
+                                                        }}
+                                                        transition={{
+                                                            duration: 2,
+                                                            repeat: Infinity,
+                                                            delay: i * 0.2
+                                                        }}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Corner accent */}
+                                        <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-br ${member.gradient} opacity-0 group-hover:opacity-20 transition-opacity duration-500 blur-2xl`} />
                                     </div>
                                 </motion.div>
                             ))}

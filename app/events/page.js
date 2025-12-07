@@ -124,7 +124,7 @@ export default function EventsPage() {
     return (
         <div className="min-h-screen flex flex-col bg-theme transition-colors duration-300">
             <Header />
-            <main className="flex-grow py-16">
+            <main className="flex-grow pt-20 pb-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="text-center mb-12">

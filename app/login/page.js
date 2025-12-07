@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
+import { AuthLayout } from '../components/auth/AuthLayout';
 import { GoogleLoginButton } from '../components/auth/GoogleLoginButton';
 import { Button } from '../components/common/Button';
 import { Input } from '../components/common/Input';
@@ -11,8 +12,8 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../hooks/useAuth';
 import { useEffect } from 'react';
-import { IoLockClosed, IoInformationCircle, IoMailOutline } from 'react-icons/io5';
-import { signInWithEmail, sendVerificationEmail, auth } from '../lib/firebase/auth';
+import { IoInformationCircle, IoMailOutline } from 'react-icons/io5';
+import { signInWithEmail } from '../lib/firebase/auth';
 import { showToast } from '../components/common/Toast';
 
 export default function LoginPage() {
@@ -71,9 +72,6 @@ export default function LoginPage() {
     const handleResendVerification = async () => {
         setLoading(true);
         try {
-            // We need to get the current user from auth
-            // Since the user is signed out, we can't resend directly
-            // Instead, show a message to check spam or sign up again
             showToast.info('Please check your spam folder or sign up again to receive a new verification email.');
         } catch (error) {
             showToast.error('Failed to resend verification email');
@@ -91,7 +89,6 @@ export default function LoginPage() {
 
         setLoading(true);
         try {
-            // Check if user exists first
             const checkRes = await fetch('/api/auth/check-email', {
                 method: 'POST',
                 headers: {
@@ -127,165 +124,152 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen flex flex-col bg-theme transition-colors duration-300">
+        <div className="min-h-screen flex flex-col">
             <Header />
-            <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="max-w-md w-full"
-                >
-                    <div className="card-theme rounded-2xl shadow-xl p-8 transition-colors duration-300">
-                        <div className="text-center mb-8">
-                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-indigo-500 to-pink-500 mb-4">
-                                <IoLockClosed className="text-white" size={28} />
+            <AuthLayout>
+                <AnimatePresence mode="wait">
+                    {showForgotPassword ? (
+                        <motion.div
+                            key="forgot-password"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="space-y-6"
+                        >
+                            <div className="text-center mb-8">
+                                <h2 className="text-3xl font-bold text-white mb-2">
+                                    Reset Password
+                                </h2>
+                                <p className="text-gray-400">
+                                    Enter your email to receive a reset link
+                                </p>
                             </div>
-                            <h2 className="text-3xl font-bold text-theme mb-2">
-                                Welcome Back
-                            </h2>
-                            <p className="text-theme-secondary">
-                                Sign in to access your account
-                            </p>
-                        </div>
 
-                        <AnimatePresence mode="wait">
-                            {showForgotPassword ? (
-                                <motion.div
-                                    key="forgot-password"
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: -20 }}
-                                    className="space-y-6"
-                                >
-                                    <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
-                                        <div className="flex gap-3">
-                                            <IoMailOutline className="text-blue-400 flex-shrink-0 mt-0.5" size={20} />
-                                            <div className="text-sm text-blue-300">
-                                                <p className="font-semibold mb-1">Reset Your Password</p>
-                                                <p>Enter your email address and we'll send you a link to reset your password.</p>
-                                            </div>
-                                        </div>
+                            <div className="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4">
+                                <div className="flex gap-3">
+                                    <IoMailOutline className="text-blue-400 flex-shrink-0 mt-0.5" size={20} />
+                                    <div className="text-sm text-blue-300">
+                                        <p className="font-semibold mb-1">Reset Your Password</p>
+                                        <p>Enter your email address and we'll send you a link to reset your password.</p>
                                     </div>
+                                </div>
+                            </div>
 
-                                    <form onSubmit={handleForgotPassword} className="space-y-4">
-                                        <Input
-                                            label="Email Address"
-                                            type="email"
-                                            value={resetEmail}
-                                            onChange={(e) => setResetEmail(e.target.value)}
-                                            required
-                                        />
-                                        <Button type="submit" loading={loading} className="w-full">
-                                            Send Reset Link
-                                        </Button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowForgotPassword(false)}
-                                            className="w-full text-sm text-theme-secondary hover:text-theme transition-colors"
-                                        >
-                                            Back to Sign In
-                                        </button>
-                                    </form>
-                                </motion.div>
-                            ) : (
-                                <motion.div
-                                    key="signin"
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: 20 }}
-                                    className="space-y-6"
+                            <form onSubmit={handleForgotPassword} className="space-y-4">
+                                <Input
+                                    label="Email Address"
+                                    type="email"
+                                    value={resetEmail}
+                                    onChange={(e) => setResetEmail(e.target.value)}
+                                    required
+                                />
+                                <Button type="submit" loading={loading} className="w-full">
+                                    Send Reset Link
+                                </Button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowForgotPassword(false)}
+                                    className="w-full text-sm text-gray-400 hover:text-white transition-colors"
                                 >
-                                    {showResendVerification && (
-                                        <motion.div
-                                            initial={{ opacity: 0, height: 0 }}
-                                            animate={{ opacity: 1, height: 'auto' }}
-                                            className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4"
-                                        >
-                                            <div className="flex gap-3">
-                                                <IoInformationCircle className="text-yellow-400 flex-shrink-0 mt-0.5" size={20} />
-                                                <div className="text-sm text-yellow-300">
-                                                    <p className="font-semibold mb-1">Email Not Verified</p>
-                                                    <p className="mb-2">Please check your email inbox (and spam folder) for the verification link.</p>
-                                                    <button
-                                                        onClick={handleResendVerification}
-                                                        className="text-yellow-200 underline hover:text-yellow-100"
-                                                    >
-                                                        Need help?
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </motion.div>
-                                    )}
+                                    Back to Sign In
+                                </button>
+                            </form>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="signin"
+                            initial={{ opacity: 0, x: -20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: 20 }}
+                            className="space-y-6"
+                        >
+                            <div className="text-center mb-8">
+                                <h2 className="text-3xl font-bold text-white">
+                                    Welcome Back
+                                </h2>
+                            </div>
 
-                                    <form onSubmit={handleSubmit} className="space-y-4">
-                                        <Input
-                                            label="Email Address"
-                                            type="email"
-                                            name="email"
-                                            value={formData.email}
-                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                            required
-                                            autoComplete="email"
-                                        />
-                                        <Input
-                                            label="Password"
-                                            type="password"
-                                            name="password"
-                                            value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                            required
-                                            autoComplete="current-password"
-                                        />
-
-                                        <div className="flex justify-end">
+                            {showResendVerification && (
+                                <motion.div
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-4"
+                                >
+                                    <div className="flex gap-3">
+                                        <IoInformationCircle className="text-yellow-400 flex-shrink-0 mt-0.5" size={20} />
+                                        <div className="text-sm text-yellow-300">
+                                            <p className="font-semibold mb-1">Email Not Verified</p>
+                                            <p className="mb-2">Please check your email inbox (and spam folder) for the verification link.</p>
                                             <button
-                                                type="button"
-                                                onClick={() => setShowForgotPassword(true)}
-                                                className="text-sm text-indigo-600 hover:text-indigo-700 transition-colors"
+                                                onClick={handleResendVerification}
+                                                className="text-yellow-200 underline hover:text-yellow-100"
                                             >
-                                                Forgot password?
+                                                Need help?
                                             </button>
                                         </div>
-
-                                        <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                            <Button type="submit" loading={loading} className="w-full py-3 text-lg font-bold">
-                                                Sign In
-                                            </Button>
-                                        </motion.div>
-                                    </form>
-
-                                    <div className="relative">
-                                        <div className="absolute inset-0 flex items-center">
-                                            <div className="w-full border-t border-theme"></div>
-                                        </div>
-                                        <div className="relative flex justify-center text-sm">
-                                            <span className="px-4 bg-theme-card text-theme-secondary">Or continue with</span>
-                                        </div>
                                     </div>
-
-                                    <GoogleLoginButton onSuccess={handleGoogleSuccess} />
-
-                                    <div className="relative">
-                                        <div className="absolute inset-0 flex items-center">
-                                            <div className="w-full border-t border-theme"></div>
-                                        </div>
-                                        <div className="relative flex justify-center text-sm">
-                                            <span className="px-4 bg-theme-card text-theme-secondary">New to Event Mania?</span>
-                                        </div>
-                                    </div>
-
-                                    <Link
-                                        href="/signup"
-                                        className="block w-full text-center bg-gradient-to-r from-indigo-600 to-pink-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
-                                    >
-                                        Create Account
-                                    </Link>
                                 </motion.div>
                             )}
-                        </AnimatePresence>
-                    </div>
-                </motion.div>
-            </main>
+
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <Input
+                                    label="Email Address"
+                                    type="email"
+                                    name="email"
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                    required
+                                    autoComplete="email"
+                                />
+                                <Input
+                                    label="Password"
+                                    type="password"
+                                    name="password"
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                                    required
+                                    autoComplete="current-password"
+                                />
+
+                                <div className="flex justify-end">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowForgotPassword(true)}
+                                        className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
+                                    >
+                                        Forgot password?
+                                    </button>
+                                </div>
+
+                                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                    <Button type="submit" loading={loading} className="w-full py-3 text-lg font-bold">
+                                        Sign In
+                                    </Button>
+                                </motion.div>
+                            </form>
+
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-slate-700"></div>
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-4 bg-slate-900/50 text-gray-400">Or continue with</span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <GoogleLoginButton onSuccess={handleGoogleSuccess} iconOnly={true} />
+                                <Link
+                                    href="/signup"
+                                    className="flex-1 text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all"
+                                >
+                                    Create Account
+                                </Link>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+            </AuthLayout>
             <Footer />
         </div>
     );

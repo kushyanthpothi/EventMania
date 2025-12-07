@@ -70,11 +70,9 @@ const StepCard = ({ number, icon: Icon, title, description, delay }) => (
     className="relative text-center group"
   >
     <div className="relative mx-auto mb-6">
+      {/* Icon Circle */}
       <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl group-hover:shadow-indigo-500/30 transition-shadow duration-300">
         <Icon className="text-white" size={32} />
-      </div>
-      <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center text-white text-sm font-bold shadow-lg">
-        {number}
       </div>
     </div>
     <h3 className="text-xl font-bold text-theme mb-2">{title}</h3>
@@ -266,7 +264,7 @@ export default function Home() {
           </motion.div>
 
           {/* Hero Content */}
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10 py-32">
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10 pt-24 pb-32">
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
@@ -448,7 +446,7 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12 relative">
               {/* Connecting Lines */}
-              <div className="hidden md:block absolute top-10 left-1/4 right-1/4 h-0.5 bg-gradient-to-r from-indigo-500/30 via-purple-500/30 to-pink-500/30"></div>
+              <div className="hidden md:block absolute top-10 left-[16.67%] right-[16.67%] h-0.5 bg-gradient-to-r from-indigo-500/30 via-purple-500/30 to-pink-500/30"></div>
 
               <StepCard
                 number={1}

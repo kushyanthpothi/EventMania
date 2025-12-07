@@ -48,11 +48,11 @@ export const Header = () => {
     ];
 
     return (
-        <header className="sticky top-0 z-30 border-b border-theme bg-theme-header backdrop-blur-sm transition-colors duration-300">
+        <header className="fixed top-0 left-0 right-0 z-30 transition-all duration-300 backdrop-blur-md">
             <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     <Link href="/" className="flex items-center space-x-2">
-                        <div className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-pink-600 bg-clip-text text-transparent">
+                        <div className="text-2xl font-bold text-white">
                             Event Mania
                         </div>
                     </Link>
@@ -62,8 +62,7 @@ export const Header = () => {
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className="hover:text-indigo-500 transition-colors font-medium"
-                                style={{ color: 'rgb(var(--text-secondary))' }}
+                                className="text-white/90 hover:text-white transition-colors font-medium"
                             >
                                 {link.label}
                             </Link>
@@ -77,10 +76,9 @@ export const Header = () => {
                                                 setProfileMenuOpen(!profileMenuOpen);
                                                 setThemeMenuOpen(false);
                                             }}
-                                            className="flex items-center space-x-2 hover:text-indigo-500 transition-colors"
-                                            style={{ color: 'rgb(var(--text-primary))' }}
+                                            className="flex items-center space-x-2 text-white hover:text-white/80 transition-colors"
                                         >
-                                            <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center">
+                                            <div className="w-8 h-8 rounded-full bg-white/20 text-white border border-white/30 flex items-center justify-center">
                                                 {userData?.name?.charAt(0).toUpperCase() || 'U'}
                                             </div>
                                         </button>
@@ -186,14 +184,13 @@ export const Header = () => {
                                 <>
                                     <Link
                                         href="/login"
-                                        className="hover:text-indigo-500 transition-colors font-medium"
-                                        style={{ color: 'rgb(var(--text-primary))' }}
+                                        className="text-white/90 hover:text-white transition-colors font-medium"
                                     >
                                         Login
                                     </Link>
                                     <Link
                                         href="/signup"
-                                        className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+                                        className="bg-white/20 text-white px-4 py-2 rounded-lg hover:bg-white/30 border border-white/30 transition-colors font-medium"
                                     >
                                         Sign Up
                                     </Link>
@@ -204,8 +201,7 @@ export const Header = () => {
 
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="md:hidden"
-                        style={{ color: 'rgb(var(--text-primary))' }}
+                        className="md:hidden text-white"
                     >
                         {mobileMenuOpen ? <IoClose size={28} /> : <IoMenu size={28} />}
                     </button>
