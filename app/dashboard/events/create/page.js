@@ -107,7 +107,7 @@ export default function CreateEventPage() {
     return (
         <div className="min-h-screen flex flex-col bg-theme transition-colors duration-300">
             <Header />
-            <main className="flex-grow py-12 px-4 sm:px-6 lg:px-8">
+            <main className="flex-grow pt-20 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-6xl mx-auto">
                     <div className="mb-8 flex items-center">
                         <Link href="/dashboard" className="mr-4 text-theme-secondary hover:text-indigo-500 transition-colors">

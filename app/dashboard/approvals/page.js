@@ -226,7 +226,7 @@ export default function ApprovalsPage() {
     return (
         <div className="min-h-screen flex flex-col bg-theme transition-colors duration-300">
             <Header />
-            <main className="flex-grow py-12 px-4 sm:px-6 lg:px-8">
+            <main className="flex-grow pt-20 pb-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-6xl mx-auto">
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-theme">Pending Approvals</h1>

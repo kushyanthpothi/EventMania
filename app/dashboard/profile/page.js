@@ -65,7 +65,7 @@ export default function ProfilePage() {
     return (
         <div className="min-h-screen flex flex-col bg-gray-50/50">
             <Header />
-            <main className="flex-grow pb-20">
+            <main className="flex-grow pt-20 pb-20">
                 {/* Hero Profile Banner */}
                 <div className="relative h-64 bg-slate-900 overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 opacity-90"></div>
