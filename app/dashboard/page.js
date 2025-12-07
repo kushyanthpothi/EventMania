@@ -1,18 +1,23 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 import { PageLoader } from '../components/common/Loader';
 import { Card } from '../components/common/Card';
+import { Input } from '../components/common/Input';
+import { Button } from '../components/common/Button';
+import { showToast } from '../components/common/Toast';
 import { USER_ROLES, COLLECTIONS } from '../lib/utils/constants';
-import { queryDocuments, getDocument } from '../lib/firebase/firestore';
+import { queryDocuments, getDocument, updateDocument } from '../lib/firebase/firestore';
+import { uploadImage } from '../lib/imgbb/upload';
 import {
     IoCalendar, IoPeople, IoTrophy, IoCheckmarkCircle, IoTimeOutline,
     IoAddCircle, IoSchool, IoAlertCircle, IoHourglass, IoMail, IoLocation,
-    IoPerson, IoGlobe, IoIdCard, IoBusiness, IoShieldCheckmark
+    IoPerson, IoGlobe, IoIdCard, IoBusiness, IoShieldCheckmark, IoCall,
+    IoPencil, IoCheckmark, IoClose, IoCamera
 } from 'react-icons/io5';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -67,14 +72,24 @@ const StatusBadge = ({ verified, approved }) => {
 };
 
 export default function DashboardPage() {
-    const { user, userData, loading } = useAuth();
+    const { user, userData, loading, refreshUser } = useAuth();
     const router = useRouter();
     const [stats, setStats] = useState({
         createdEvents: [],
         pendingRequests: [],
         pendingEvents: [],
-        studentRegistrations: []
+        studentRegistrations: [],
+        collegeName: '',
+        collegeLocation: ''
     });
+
+    // Edit State
+    const [isEditing, setIsEditing] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [editData, setEditData] = useState({});
+    const [profileFile, setProfileFile] = useState(null);
+    const [profilePreview, setProfilePreview] = useState(null);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         if (!loading && !user) {
@@ -82,51 +97,169 @@ export default function DashboardPage() {
         }
     }, [user, loading, router]);
 
-    useEffect(() => {
-        const fetchDashboardData = async () => {
-            if (!user || !userData) return;
+    const fetchData = async () => {
+        if (!user || !userData) return;
 
-            if (userData.role === USER_ROLES.COLLEGE_ADMIN) {
-                const { data: createdEvents } = await queryDocuments(COLLECTIONS.EVENTS, [
-                    { field: 'createdBy', operator: '==', value: user.uid }
-                ]);
-                const collegeId = `college_${user.uid}`;
-                const { data: students } = await queryDocuments(COLLECTIONS.USERS, [
-                    { field: 'collegeId', operator: '==', value: collegeId },
-                    { field: 'role', operator: '==', value: USER_ROLES.STUDENT }
-                ]);
-                const pendingRequests = students?.filter(s => !s.verified) || [];
-                const pendingEvents = createdEvents?.filter(e => e.status === 'pending') || [];
-                setStats({
-                    createdEvents: createdEvents || [],
-                    pendingRequests: pendingRequests || [],
-                    pendingEvents: pendingEvents
-                });
-            } else if (userData.role === USER_ROLES.STUDENT) {
-                // Fetch student's registrations
-                const { data: registrations } = await queryDocuments(COLLECTIONS.REGISTRATIONS, [
-                    { field: 'studentId', operator: '==', value: user.uid }
-                ]);
+        if (userData.role === USER_ROLES.COLLEGE_ADMIN) {
+            const { data: createdEvents } = await queryDocuments(COLLECTIONS.EVENTS, [
+                { field: 'createdBy', operator: '==', value: user.uid }
+            ]);
+            const collegeId = `college_${user.uid}`;
 
-                // Fetch college name if we have collegeId
-                let collegeName = 'Unknown College';
-                if (userData.collegeId) {
-                    const { data: college } = await getDocument(COLLECTIONS.COLLEGES, userData.collegeId);
-                    if (college) {
-                        collegeName = college.name;
-                    }
+            // Fetch college details directly from colleges collection
+            const { data: collegeData } = await getDocument(COLLECTIONS.COLLEGES, collegeId);
+
+            const { data: students } = await queryDocuments(COLLECTIONS.USERS, [
+                { field: 'collegeId', operator: '==', value: collegeId },
+                { field: 'role', operator: '==', value: USER_ROLES.STUDENT }
+            ]);
+            const pendingRequests = students?.filter(s => !s.verified) || [];
+            const verifiedStudents = students?.filter(s => s.verified) || [];
+            const pendingEvents = createdEvents?.filter(e => e.status === 'pending') || [];
+            setStats({
+                createdEvents: createdEvents || [],
+                pendingRequests: pendingRequests || [],
+                verifiedStudents: verifiedStudents || [],
+                pendingEvents: pendingEvents,
+                collegeName: collegeData?.name || userData?.collegeName,
+                collegeLocation: collegeData?.location || userData?.collegeLocation
+            });
+        } else if (userData.role === USER_ROLES.STUDENT) {
+            // Fetch student's registrations
+            const { data: registrations } = await queryDocuments(COLLECTIONS.REGISTRATIONS, [
+                { field: 'studentId', operator: '==', value: user.uid }
+            ]);
+
+            // Fetch college details if we have collegeId
+            let collegeName = 'Unknown College';
+            let collegeLocation = 'Unknown Location';
+            if (userData.collegeId) {
+                const { data: college } = await getDocument(COLLECTIONS.COLLEGES, userData.collegeId);
+                if (college) {
+                    collegeName = college.name;
+                    collegeLocation = college.location;
                 }
-
-                setStats(prev => ({
-                    ...prev,
-                    studentRegistrations: registrations || [],
-                    collegeName: collegeName
-                }));
             }
-        };
 
-        fetchDashboardData();
+            setStats(prev => ({
+                ...prev,
+                studentRegistrations: registrations || [],
+                collegeName: collegeName,
+                collegeLocation: collegeLocation
+            }));
+        } else if (userData.role === USER_ROLES.SUPER_ADMIN) {
+            // Fetch all users for Super Admin stats
+            const { data: allUsers } = await queryDocuments(COLLECTIONS.USERS);
+            setStats(prev => ({
+                ...prev,
+                totalUsers: allUsers?.length || 0
+            }));
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
     }, [user, userData]);
+
+    const handleEditStart = () => {
+        setEditData({
+            name: userData.name || '',
+            phoneNumber: userData.phoneNumber || '',
+            registrationNumber: userData.registrationNumber || '',
+            collegeName: stats.collegeName || userData.collegeName || '',
+            collegeLocation: stats.collegeLocation || userData.collegeLocation || '',
+            companyName: userData.companyName || '',
+            companyWebsite: userData.companyWebsite || ''
+        });
+        setProfilePreview(userData.profileImg || null);
+        setProfileFile(null);
+        setIsEditing(true);
+    };
+
+    const handleEditCancel = () => {
+        setIsEditing(false);
+        setProfileFile(null);
+        setProfilePreview(null);
+    };
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                showToast.error("Image size too large (max 5MB)");
+                return;
+            }
+            setProfileFile(file);
+            setProfilePreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            let photoURL = userData.profileImg;
+
+            // 1. Upload new profile pic if selected
+            if (profileFile) {
+                const { url, error } = await uploadImage(profileFile);
+                if (error) throw new Error("Image upload failed: " + error);
+                photoURL = url;
+            }
+
+            // 2. Prepare User Updates
+            const userUpdates = {
+                name: editData.name,
+                phoneNumber: editData.phoneNumber,
+                updatedAt: new Date()
+            };
+
+            if (photoURL !== userData.profileImg) {
+                userUpdates.profileImg = photoURL;
+            }
+
+            if (userData.role === USER_ROLES.STUDENT) {
+                userUpdates.registrationNumber = editData.registrationNumber;
+            } else if (userData.role === USER_ROLES.COMPANY) {
+                userUpdates.companyName = editData.companyName;
+                userUpdates.companyWebsite = editData.companyWebsite;
+            }
+
+            // Update User Doc
+            const { error: userError } = await updateDocument(COLLECTIONS.USERS, user.uid, userUpdates);
+            if (userError) throw new Error(userError);
+
+            // 3. Prepare College Updates (If College Admin)
+            if (userData.role === USER_ROLES.COLLEGE_ADMIN) {
+                const collegeId = `college_${user.uid}`;
+                // Only update if changes were made
+                const collegeUpdates = {};
+                // Compare with current displayed stats to minimize writes? 
+                // Just writing is safer to ensure sync.
+                if (editData.collegeName) collegeUpdates.name = editData.collegeName;
+                if (editData.collegeLocation) collegeUpdates.location = editData.collegeLocation;
+
+                if (Object.keys(collegeUpdates).length > 0) {
+                    const { error: collegeError } = await updateDocument(COLLECTIONS.COLLEGES, collegeId, collegeUpdates);
+                    if (collegeError) throw new Error("Failed to update college details: " + collegeError);
+                }
+            }
+
+            // Success
+            showToast.success("Profile updated successfully!");
+            setIsEditing(false);
+
+            // Refresh user data to update UI instantly
+            await refreshUser();
+            // Re-fetch local dashboard stats
+            fetchData();
+
+        } catch (error) {
+            console.error(error);
+            showToast.error(error.message || "Failed to update profile");
+        } finally {
+            setIsSaving(false);
+        }
+    };
 
     if (loading) return <PageLoader />;
     if (!user) return null;
@@ -146,39 +279,125 @@ export default function DashboardPage() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5 }}
-                        className="card-theme rounded-3xl shadow-xl overflow-hidden mb-8 transition-colors duration-300"
+                        className="card-theme rounded-3xl shadow-xl overflow-hidden mb-8 transition-colors duration-300 relative"
                     >
+                        {/* Edit Toggle Button */}
+                        <div className="absolute top-6 right-6 z-20">
+                            {isEditing ? (
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={handleEditCancel}
+                                        className="p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                                        title="Cancel"
+                                        disabled={isSaving}
+                                    >
+                                        <IoClose size={20} />
+                                    </button>
+                                    <button
+                                        onClick={handleSave}
+                                        className="p-2 rounded-full bg-green-500/10 text-green-500 hover:bg-green-500/20 transition-colors"
+                                        title="Save Changes"
+                                        disabled={isSaving}
+                                    >
+                                        {isSaving ? <IoHourglass size={20} className="animate-spin" /> : <IoCheckmark size={20} />}
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={handleEditStart}
+                                    className="p-2 rounded-full bg-theme-surface border border-theme hover:border-indigo-500/50 text-theme-secondary hover:text-indigo-500 transition-all"
+                                    title="Edit Profile"
+                                >
+                                    <IoPencil size={18} />
+                                </button>
+                            )}
+                        </div>
+
                         {/* Profile Header */}
                         <div className="p-8 pb-0">
                             <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
-                                <div className="flex-shrink-0">
-                                    <div className="w-32 h-32 rounded-full border-4 border-theme shadow-2xl overflow-hidden bg-theme-surface ring-4 ring-indigo-500/20">
-                                        {userData?.profileImg ? (
-                                            <img src={userData.profileImg} alt={userData.name} className="w-full h-full object-cover" />
+                                <div className="flex-shrink-0 relative group">
+                                    <div className="w-32 h-32 rounded-full border-4 border-theme shadow-2xl overflow-hidden bg-theme-surface ring-4 ring-indigo-500/20 relative">
+                                        {(isEditing && profilePreview) || userData?.profileImg ? (
+                                            <img src={isEditing ? profilePreview : userData.profileImg} alt="Profile" className="w-full h-full object-cover" />
                                         ) : (
                                             <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-indigo-500/20 to-purple-500/20">
                                                 <IoPerson size={64} className="text-indigo-400" />
                                             </div>
                                         )}
+
+                                        {/* Edit Overlay */}
+                                        {isEditing && (
+                                            <div
+                                                className="absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                                                onClick={() => fileInputRef.current?.click()}
+                                            >
+                                                <IoCamera size={32} className="text-white" />
+                                            </div>
+                                        )}
                                     </div>
+                                    <input
+                                        type="file"
+                                        ref={fileInputRef}
+                                        className="hidden"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                    />
                                 </div>
-                                <div className="flex-grow text-center md:text-left pt-2">
-                                    <h1 className="text-3xl font-bold text-theme tracking-tight mb-2">
-                                        {userData?.name}
-                                    </h1>
+                                <div className="flex-grow text-center md:text-left pt-2 w-full md:w-auto">
+                                    {isEditing ? (
+                                        <div className="mb-4 max-w-sm">
+                                            <Input
+                                                label="Full Name"
+                                                value={editData.name}
+                                                onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                                                className="mb-0"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <h1 className="text-3xl font-bold text-theme tracking-tight mb-2">
+                                            {userData?.name}
+                                        </h1>
+                                    )}
+
                                     <div className="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
                                         <RoleBadge role={userData?.role} />
                                         <StatusBadge verified={userData?.verified} approved={userData?.approvedBySuper} />
                                     </div>
+
                                     <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-6 text-theme-secondary text-sm font-medium">
                                         <div className="flex items-center">
                                             <IoMail className="mr-2 text-theme-secondary/70" size={16} />
                                             {userData?.email}
                                         </div>
-                                        {userData?.role === USER_ROLES.COLLEGE_ADMIN && (
+
+                                        {/* Phone Number Logic */}
+                                        {(isEditing || userData?.phoneNumber) && (
+                                            <div className="flex items-center">
+                                                {isEditing ? (
+                                                    <div className="flex items-center gap-2">
+                                                        <IoCall className="text-theme-secondary/70" size={16} />
+                                                        <input
+                                                            type="text"
+                                                            value={editData.phoneNumber}
+                                                            onChange={(e) => setEditData({ ...editData, phoneNumber: e.target.value })}
+                                                            className="bg-transparent border-b border-theme focus:border-indigo-500 outline-none text-theme px-1 py-0.5 w-32"
+                                                            placeholder="Phone Number"
+                                                        />
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <IoCall className="mr-2 text-theme-secondary/70" size={16} />
+                                                        {userData?.phoneNumber}
+                                                    </>
+                                                )}
+                                            </div>
+                                        )}
+
+                                        {(userData?.role === USER_ROLES.COLLEGE_ADMIN) && (
                                             <div className="flex items-center">
                                                 <IoLocation className="mr-2 text-theme-secondary/70" size={16} />
-                                                {userData?.collegeLocation || 'Location not set'}
+                                                {stats.collegeLocation || userData?.collegeLocation || 'Location not set'}
                                             </div>
                                         )}
                                         <div className="flex items-center">
@@ -197,35 +416,128 @@ export default function DashboardPage() {
 
                                 {userData?.role === USER_ROLES.STUDENT && (
                                     <>
-                                        <InfoCard icon={IoIdCard} label="Registration Number" value={userData?.registrationNumber} />
+                                        {isEditing ? (
+                                            <div className="card-theme p-4 rounded-xl shadow-sm">
+                                                <Input
+                                                    label="Registration Number"
+                                                    value={editData.registrationNumber}
+                                                    onChange={(e) => setEditData({ ...editData, registrationNumber: e.target.value })}
+                                                />
+                                            </div>
+                                        ) : (
+                                            <InfoCard icon={IoIdCard} label="Registration Number" value={userData?.registrationNumber} />
+                                        )}
+
+                                        {/* Student sees college name, usually cant edit unless we allow them to change specific fields, but standard logic implies read-only from college. 
+                                            User prompt says "COLLEGE NAME... CAN BE EDITED". For student, this usually means correcting a text field if it was manual. 
+                                            But since we fetch from COLLEGES collection, editing here wouldn't change the college doc. 
+                                            We will keep it read-only for students to avoid confusion, or allow if it was stored on user doc. 
+                                            Given current arch, Student collegeName is derived. We skip editing for Student College Name to prevent bugs. 
+                                            Only College Admin can edit College Name.
+                                        */}
                                         <InfoCard icon={IoSchool} label="College Name" value={stats.collegeName || 'Loading...'} />
+                                        <InfoCard icon={IoLocation} label="College Location" value={stats.collegeLocation || 'Loading...'} />
                                     </>
                                 )}
 
                                 {userData?.role === USER_ROLES.COLLEGE_ADMIN && (
                                     <>
-                                        <InfoCard icon={IoSchool} label="College Name" value={userData?.collegeName} />
-                                        <InfoCard icon={IoLocation} label="Campus Location" value={userData?.collegeLocation} />
+                                        {isEditing ? (
+                                            <>
+                                                <div className="card-theme p-4 rounded-xl shadow-sm">
+                                                    <Input
+                                                        label="College Name"
+                                                        value={editData.collegeName}
+                                                        onChange={(e) => setEditData({ ...editData, collegeName: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="card-theme p-4 rounded-xl shadow-sm">
+                                                    <Input
+                                                        label="Campus Location"
+                                                        value={editData.collegeLocation}
+                                                        onChange={(e) => setEditData({ ...editData, collegeLocation: e.target.value })}
+                                                    />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <InfoCard icon={IoSchool} label="College Name" value={stats.collegeName || userData?.collegeName} />
+                                                <InfoCard icon={IoLocation} label="Campus Location" value={stats.collegeLocation || userData?.collegeLocation} />
+                                            </>
+                                        )}
                                     </>
                                 )}
 
                                 {userData?.role === USER_ROLES.COMPANY && (
                                     <>
-                                        <InfoCard icon={IoBusiness} label="Company Name" value={userData?.companyName} />
-                                        <InfoCard icon={IoGlobe} label="Website" value={userData?.companyWebsite} />
+                                        {isEditing ? (
+                                            <>
+                                                <div className="card-theme p-4 rounded-xl shadow-sm">
+                                                    <Input
+                                                        label="Company Name"
+                                                        value={editData.companyName}
+                                                        onChange={(e) => setEditData({ ...editData, companyName: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="card-theme p-4 rounded-xl shadow-sm">
+                                                    <Input
+                                                        label="Website"
+                                                        value={editData.companyWebsite}
+                                                        onChange={(e) => setEditData({ ...editData, companyWebsite: e.target.value })}
+                                                    />
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <InfoCard icon={IoBusiness} label="Company Name" value={userData?.companyName} />
+                                                <InfoCard icon={IoGlobe} label="Website" value={userData?.companyWebsite} />
+                                            </>
+                                        )}
                                     </>
                                 )}
 
                                 {userData?.role === USER_ROLES.SUPER_ADMIN && (
-                                    <div className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 p-4 rounded-xl border border-indigo-500/30 flex items-center space-x-3 md:col-span-1 lg:col-span-2">
+                                    <div className="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 p-4 rounded-xl border border-indigo-500/30 flex items-center space-x-3 transition-all hover:shadow-md cursor-default">
                                         <div className="flex-shrink-0 bg-theme-card p-2 rounded-lg text-indigo-400 shadow-sm">
                                             <IoShieldCheckmark size={24} />
                                         </div>
-                                        <div>
-                                            <h4 className="text-base font-bold text-indigo-300">System Administrator Access</h4>
-                                            <p className="text-xs text-indigo-400">You have elevated privileges to manage the entire platform.</p>
+                                        <div className="min-w-0">
+                                            <h4 className="text-base font-bold text-indigo-300 truncate">Admin Access</h4>
+                                            <p className="text-xs text-indigo-400 truncate">System privileges active</p>
                                         </div>
                                     </div>
+                                )}
+
+                                {userData?.role === USER_ROLES.COLLEGE_ADMIN && (
+                                    <Link href="/dashboard/users" className="block col-span-1">
+                                        <div className="card-theme p-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer border border-transparent hover:border-indigo-500/30 h-full">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="p-2 bg-green-500/20 text-green-500 rounded-lg">
+                                                    <IoPeople size={20} />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-xs font-medium text-theme-secondary truncate">Students</p>
+                                                    <h4 className="text-xl font-bold text-theme truncate">{stats.verifiedStudents?.length || 0}</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Link>
+                                )}
+
+                                {userData?.role === USER_ROLES.SUPER_ADMIN && (
+                                    <Link href="/dashboard/users" className="block col-span-1">
+                                        <div className="card-theme p-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer border border-transparent hover:border-indigo-500/30 h-full">
+                                            <div className="flex items-center space-x-3">
+                                                <div className="p-2 bg-blue-500/20 text-blue-500 rounded-lg">
+                                                    <IoPeople size={20} />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <p className="text-xs font-medium text-theme-secondary truncate">Total Users</p>
+                                                    <h4 className="text-xl font-bold text-theme truncate">{stats.totalUsers || 0}</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </Link>
                                 )}
                             </div>
                         </div>

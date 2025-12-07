@@ -127,33 +127,33 @@ export default function VerificationsPage() {
     if (!user || userData?.role !== USER_ROLES.COLLEGE_ADMIN) return null;
 
     return (
-        <div className="min-h-screen flex flex-col bg-gray-50">
+        <div className="min-h-screen flex flex-col bg-theme transition-colors duration-300">
             <Header />
             <main className="flex-grow py-12 px-4 sm:px-6 lg:px-8">
                 <div className="max-w-5xl mx-auto">
                     <div className="mb-8 flex items-center justify-between">
                         <div className="flex items-center">
-                            <Link href="/dashboard" className="mr-4 text-gray-500 hover:text-indigo-600 transition-colors">
+                            <Link href="/dashboard" className="mr-4 text-theme-secondary hover:text-indigo-500 transition-colors">
                                 <IoArrowBack size={24} />
                             </Link>
                             <div>
-                                <h1 className="text-3xl font-bold text-gray-900">Student Verifications</h1>
-                                <p className="text-gray-600 mt-1">Verify students registered under your college</p>
+                                <h1 className="text-3xl font-bold text-theme">Student Verifications</h1>
+                                <p className="text-theme-secondary mt-1">Verify students registered under your college</p>
                             </div>
                         </div>
-                        <div className="bg-white px-4 py-2 rounded-lg shadow-sm border border-gray-200">
-                            <span className="text-gray-500 font-medium">Pending: </span>
-                            <span className="text-indigo-600 font-bold ml-1">{requests.length}</span>
+                        <div className="card-theme px-4 py-2 rounded-lg shadow-sm">
+                            <span className="text-theme-secondary font-medium">Pending: </span>
+                            <span className="text-indigo-500 font-bold ml-1">{requests.length}</span>
                         </div>
                     </div>
 
                     {requests.length === 0 ? (
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center">
-                            <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <div className="card-theme rounded-2xl shadow-sm p-12 text-center transition-colors duration-300">
+                            <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <IoCheckmarkCircle className="text-green-500" size={40} />
                             </div>
-                            <h3 className="text-xl font-bold text-gray-900 mb-2">All Caught Up!</h3>
-                            <p className="text-gray-600">There are no pending student verification requests at this time.</p>
+                            <h3 className="text-xl font-bold text-theme mb-2">All Caught Up!</h3>
+                            <p className="text-theme-secondary">There are no pending student verification requests at this time.</p>
                         </div>
                     ) : (
                         <div className="space-y-4">
@@ -165,7 +165,7 @@ export default function VerificationsPage() {
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, x: -100 }}
                                         layout
-                                        className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-shadow hover:shadow-md"
+                                        className="card-theme rounded-xl shadow-sm p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all duration-300 hover:shadow-md border border-transparent hover:border-indigo-500/30"
                                     >
                                         <div className="flex items-start space-x-4">
                                             <div className="flex-shrink-0">
@@ -173,25 +173,25 @@ export default function VerificationsPage() {
                                                     <img
                                                         src={student.profileImg}
                                                         alt={student.name}
-                                                        className="w-16 h-16 rounded-full object-cover border-2 border-indigo-50"
+                                                        className="w-16 h-16 rounded-full object-cover border-2 border-indigo-500/20"
                                                     />
                                                 ) : (
-                                                    <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center border-2 border-indigo-100">
-                                                        <IoPerson className="text-indigo-300" size={32} />
+                                                    <div className="w-16 h-16 rounded-full bg-indigo-500/10 flex items-center justify-center border-2 border-indigo-500/20">
+                                                        <IoPerson className="text-indigo-400" size={32} />
                                                     </div>
                                                 )}
                                             </div>
                                             <div>
-                                                <h3 className="text-lg font-bold text-gray-900">{student.name}</h3>
-                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1 text-sm text-gray-600">
+                                                <h3 className="text-lg font-bold text-theme">{student.name}</h3>
+                                                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 mt-1 text-sm text-theme-secondary">
                                                     <span className="flex items-center">
                                                         <IoSchool className="mr-1.5 text-indigo-400" />
                                                         {student.registrationNumber}
                                                     </span>
-                                                    <span className="hidden sm:inline text-gray-300">|</span>
-                                                    <span className="text-gray-500">{student.email}</span>
+                                                    <span className="hidden sm:inline text-theme-secondary/30">|</span>
+                                                    <span>{student.email}</span>
                                                 </div>
-                                                <p className="text-xs text-gray-400 mt-2">
+                                                <p className="text-xs text-theme-secondary/60 mt-2">
                                                     Joined: {new Date(student.createdAt?.seconds * 1000 || Date.now()).toLocaleDateString()}
                                                 </p>
                                             </div>
@@ -202,7 +202,7 @@ export default function VerificationsPage() {
                                                 variant="outline"
                                                 onClick={() => handleReject(student)}
                                                 disabled={actionLoading === student.uid}
-                                                className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 transition-colors"
+                                                className="border-red-500/30 text-red-500 hover:bg-red-500/10 hover:border-red-500/50 transition-colors"
                                             >
                                                 {actionLoading === student.uid ? '...' : 'Reject'}
                                             </Button>

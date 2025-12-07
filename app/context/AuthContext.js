@@ -12,12 +12,26 @@ export const AuthProvider = ({ children }) => {
     const [userData, setUserData] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    const fetchUserData = async (uid) => {
+        try {
+            const { data } = await getDocument(COLLECTIONS.USERS, uid);
+            setUserData(data);
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+        }
+    };
+
+    const refreshUser = async () => {
+        if (user) {
+            await fetchUserData(user.uid);
+        }
+    };
+
     useEffect(() => {
         const unsubscribe = onAuthChange(async (firebaseUser) => {
             if (firebaseUser) {
                 setUser(firebaseUser);
-                const { data } = await getDocument(COLLECTIONS.USERS, firebaseUser.uid);
-                setUserData(data);
+                await fetchUserData(firebaseUser.uid);
             } else {
                 setUser(null);
                 setUserData(null);
@@ -32,9 +46,12 @@ export const AuthProvider = ({ children }) => {
         user,
         userData,
         loading,
+        refreshUser,
         isAuthenticated: !!user,
+        emailVerified: user?.emailVerified || false,
         isVerified: userData?.verified || false,
-        role: userData?.role || null
+        role: userData?.role || null,
+        needsRoleSelection: user?.emailVerified && !userData?.role
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
