@@ -39,3 +39,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+event-mania-2025-firebase-adminsdk-fbsvc-ba8c35b918.json

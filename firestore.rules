@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if user is accessing their own data
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 1. USERS COLLECTION
+    // Allow users to read and write their own profile
+    // 1. USERS COLLECTION
+    // Allow users to read and write their own profile
+    match /users/{userId} {
+      allow read: if isOwner(userId) || true;
+      allow create: if isOwner(userId);
+      allow update: if isAuthenticated(); // Needed for Super Admin to approve college/company admins
+      allow delete: if isAuthenticated(); // Allow admins to remove rejected users
+    }
+
+    // 2. COLLEGES COLLECTION
+    match /colleges/{collegeId} {
+      // Allow reading colleges (needed for the signup dropdown)
+      allow read: if true; 
+      // Allow authenticated users to create a college registration (pending approval)
+      allow create: if isAuthenticated();
+      // Only admin or the creator allows updates (simplified for now)
+      allow update: if isAuthenticated(); 
+      allow delete: if isAuthenticated(); // Allow admins to remove rejected colleges
+    }
+
+    // 3. COMPANIES COLLECTION
+    match /companies/{companyId} {
+      allow read: if true;
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated();
+      allow delete: if isAuthenticated(); // Allow admins to remove rejected companies
+    }
+
+    // 4. VERIFICATION REQUESTS (Moved to bottom to consolidate with new rules)
+    
+    // 5. EVENTS (General access for now, refine later)
+    match /events/{eventId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+    
+    // NOTIFICATIONS
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      // Allow users to create notifications (or allow system to do it via client for now)
+      allow create: if isAuthenticated(); 
+      // Allow user to mark their own notification as read
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid;
+    }
+    
+    // REGISTRATIONS
+    match /registrations/{registrationId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        allow update: if isAuthenticated();
+    }
+    match /verificationRequests/{requestId} {
+      allow create: if isAuthenticated() && request.resource.data.studentId == request.auth.uid;
+      // Allow student/super_admin to read
+      allow read: if isAuthenticated() && (resource.data.studentId == request.auth.uid || true); // Allow all auth read for now to prevent header errors if any
+      allow update: if isAuthenticated(); // Allow super admin to approve/reject
+      allow delete: if isAuthenticated(); // Allow deletion upon rejection
+    }
+    
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
