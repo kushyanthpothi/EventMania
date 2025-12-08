@@ -17,7 +17,7 @@ import {
     IoCalendar, IoPeople, IoTrophy, IoCheckmarkCircle, IoTimeOutline,
     IoAddCircle, IoSchool, IoAlertCircle, IoHourglass, IoMail, IoLocation,
     IoPerson, IoGlobe, IoIdCard, IoBusiness, IoShieldCheckmark, IoCall,
-    IoPencil, IoCheckmark, IoClose, IoCamera
+    IoPencil, IoCheckmark, IoClose, IoCamera, IoArrowForward
 } from 'react-icons/io5';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                     <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-32 relative z-10">
+                <div className="w-full px-4 sm:px-6 lg:px-8 -mt-32 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -283,34 +283,47 @@ export default function DashboardPage() {
                     >
                         {/* Edit Toggle Button */}
                         <div className="absolute top-6 right-6 z-20">
-                            {isEditing ? (
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={handleEditCancel}
-                                        className="p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
-                                        title="Cancel"
-                                        disabled={isSaving}
+                            <div className="flex gap-2">
+                                {userData?.role === USER_ROLES.COLLEGE_ADMIN && !isEditing && (
+                                    <Link
+                                        href="/dashboard/events/create"
+                                        className="p-2 rounded-full bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 transition-all flex items-center gap-2 px-4"
+                                        title="Create Event"
                                     >
-                                        <IoClose size={20} />
-                                    </button>
+                                        <IoAddCircle size={20} />
+                                        <span className="text-sm font-semibold">Create Event</span>
+                                    </Link>
+                                )}
+
+                                {isEditing ? (
+                                    <>
+                                        <button
+                                            onClick={handleEditCancel}
+                                            className="p-2 rounded-full bg-red-500/10 text-red-500 hover:bg-red-500/20 transition-colors"
+                                            title="Cancel"
+                                            disabled={isSaving}
+                                        >
+                                            <IoClose size={20} />
+                                        </button>
+                                        <button
+                                            onClick={handleSave}
+                                            className="p-2 rounded-full bg-green-500/10 text-green-500 hover:bg-green-500/20 transition-colors"
+                                            title="Save Changes"
+                                            disabled={isSaving}
+                                        >
+                                            {isSaving ? <IoHourglass size={20} className="animate-spin" /> : <IoCheckmark size={20} />}
+                                        </button>
+                                    </>
+                                ) : (
                                     <button
-                                        onClick={handleSave}
-                                        className="p-2 rounded-full bg-green-500/10 text-green-500 hover:bg-green-500/20 transition-colors"
-                                        title="Save Changes"
-                                        disabled={isSaving}
+                                        onClick={handleEditStart}
+                                        className="p-2 rounded-full bg-theme-surface border border-theme hover:border-indigo-500/50 text-theme-secondary hover:text-indigo-500 transition-all"
+                                        title="Edit Profile"
                                     >
-                                        {isSaving ? <IoHourglass size={20} className="animate-spin" /> : <IoCheckmark size={20} />}
+                                        <IoPencil size={18} />
                                     </button>
-                                </div>
-                            ) : (
-                                <button
-                                    onClick={handleEditStart}
-                                    className="p-2 rounded-full bg-theme-surface border border-theme hover:border-indigo-500/50 text-theme-secondary hover:text-indigo-500 transition-all"
-                                    title="Edit Profile"
-                                >
-                                    <IoPencil size={18} />
-                                </button>
-                            )}
+                                )}
+                            </div>
                         </div>
 
                         {/* Profile Header */}
@@ -508,22 +521,6 @@ export default function DashboardPage() {
                                     </div>
                                 )}
 
-                                {userData?.role === USER_ROLES.COLLEGE_ADMIN && (
-                                    <Link href="/dashboard/users" className="block col-span-1">
-                                        <div className="card-theme p-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer border border-transparent hover:border-indigo-500/30 h-full">
-                                            <div className="flex items-center space-x-3">
-                                                <div className="p-2 bg-green-500/20 text-green-500 rounded-lg">
-                                                    <IoPeople size={20} />
-                                                </div>
-                                                <div className="min-w-0">
-                                                    <p className="text-xs font-medium text-theme-secondary truncate">Students</p>
-                                                    <h4 className="text-xl font-bold text-theme truncate">{stats.verifiedStudents?.length || 0}</h4>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </Link>
-                                )}
-
                                 {userData?.role === USER_ROLES.SUPER_ADMIN && (
                                     <Link href="/dashboard/users" className="block col-span-1">
                                         <div className="card-theme p-4 rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer border border-transparent hover:border-indigo-500/30 h-full">
@@ -625,71 +622,85 @@ export default function DashboardPage() {
                                 {/* --- COLLEGE ADMIN DASHBOARD --- */}
                                 {userData?.role === USER_ROLES.COLLEGE_ADMIN && (
                                     <>
-                                        {/* Create Event Card */}
-                                        <div className="card-theme rounded-2xl shadow-lg transition-colors duration-300">
-                                            <div className="p-6">
-                                                <div className="flex items-center justify-between mb-4">
-                                                    <h3 className="text-lg font-semibold text-theme">Create Event</h3>
-                                                    <IoTrophy className="text-pink-500" size={24} />
-                                                </div>
-                                                <p className="text-sm text-theme-secondary mb-4">
-                                                    Organize amazing events for students
-                                                </p>
-                                                <Link
-                                                    href="/dashboard/events/create"
-                                                    className="block text-center bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 transition-colors"
-                                                >
-                                                    Create New Event
-                                                </Link>
-                                            </div>
-                                        </div>
-
                                         {/* Events List */}
-                                        <div className="card-theme rounded-2xl shadow-lg transition-colors duration-300 md:col-span-1">
+                                        <Link href="/dashboard/events" className="card-theme rounded-2xl shadow-lg transition-colors duration-300 md:col-span-1 block hover:border-indigo-500/30">
                                             <div className="p-6 h-full">
-                                                <div className="flex items-center space-x-3 mb-4">
-                                                    <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
-                                                        <IoCalendar size={20} />
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
+                                                            <IoCalendar size={20} />
+                                                        </div>
+                                                        <h3 className="font-bold text-theme">My Events</h3>
                                                     </div>
-                                                    <h3 className="font-bold text-theme">Events</h3>
+                                                    <IoArrowForward className="text-theme-secondary" size={20} />
                                                 </div>
-                                                <div className="space-y-3 max-h-60 overflow-y-auto">
-                                                    {stats.createdEvents.length > 0 ? (
-                                                        stats.createdEvents.map(event => (
-                                                            <div key={event.id} className="p-3 bg-theme-surface rounded-lg border border-theme">
-                                                                <p className="font-semibold text-theme truncate">{event.name}</p>
-                                                                <div className="flex justify-between items-center mt-1">
-                                                                    <span className={`text-xs px-2 py-0.5 rounded-full ${event.status === 'approved' ? 'bg-green-500/20 text-green-400' :
-                                                                        event.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
-                                                                            'bg-yellow-500/20 text-yellow-400'
-                                                                        }`}>
-                                                                        {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
-                                                                    </span>
-                                                                    <span className="text-xs text-theme-secondary">{new Date(event.startDate).toLocaleDateString()}</span>
-                                                                </div>
-                                                                {event.status === 'rejected' && event.rejectionReason && (
-                                                                    <p className="text-xs text-red-400 mt-2 bg-red-500/20 p-1.5 rounded">
-                                                                        Reason: {event.rejectionReason}
-                                                                    </p>
-                                                                )}
 
-                                                                {event.status === 'rejected' ? (
-                                                                    <Link href={`/dashboard/events/${event.id}/edit`} className="block mt-3 text-center text-xs card-theme border border-orange-500/30 text-orange-400 py-1.5 rounded hover:bg-orange-500/10 transition-colors">
-                                                                        Edit Event
-                                                                    </Link>
-                                                                ) : (
-                                                                    <Link href={`/dashboard/events/${event.id}/registrations`} className="block mt-3 text-center text-xs card-theme border border-indigo-500/30 text-indigo-400 py-1.5 rounded hover:bg-indigo-500/10 transition-colors">
-                                                                        View Registrations
-                                                                    </Link>
-                                                                )}
-                                                            </div>
-                                                        ))
-                                                    ) : (
-                                                        <p className="text-theme-secondary text-sm italic">No events created yet.</p>
-                                                    )}
+                                                <div className="flex items-baseline mb-4">
+                                                    <p className="text-5xl font-black text-indigo-500">
+                                                        {stats.createdEvents.length}
+                                                    </p>
+                                                    <p className="ml-2 text-theme-secondary font-medium">events</p>
+                                                </div>
+
+                                                <div className="grid grid-cols-3 gap-2 text-center">
+                                                    <div className="bg-theme-surface rounded-lg p-2">
+                                                        <p className="text-xs text-theme-secondary">Approved</p>
+                                                        <p className="text-lg font-bold text-green-400">
+                                                            {stats.createdEvents.filter(e => e.status === 'approved').length}
+                                                        </p>
+                                                    </div>
+                                                    <div className="bg-theme-surface rounded-lg p-2">
+                                                        <p className="text-xs text-theme-secondary">Pending</p>
+                                                        <p className="text-lg font-bold text-yellow-400">
+                                                            {stats.createdEvents.filter(e => e.status === 'pending').length}
+                                                        </p>
+                                                    </div>
+                                                    <div className="bg-theme-surface rounded-lg p-2">
+                                                        <p className="text-xs text-theme-secondary">Rejected</p>
+                                                        <p className="text-lg font-bold text-red-400">
+                                                            {stats.createdEvents.filter(e => e.status === 'rejected').length}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </Link>
+
+                                        {/* Students Card */}
+                                        <Link href="/dashboard/users" className="card-theme rounded-2xl shadow-lg transition-colors duration-300 md:col-span-1 block hover:border-indigo-500/30">
+                                            <div className="p-6 h-full">
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="p-2 bg-green-500/20 rounded-lg text-green-400">
+                                                            <IoPeople size={20} />
+                                                        </div>
+                                                        <h3 className="font-bold text-theme">Students</h3>
+                                                    </div>
+                                                    <IoArrowForward className="text-theme-secondary" size={20} />
+                                                </div>
+
+                                                <div className="flex items-baseline mb-4">
+                                                    <p className="text-5xl font-black text-green-500">
+                                                        {stats.verifiedStudents?.length || 0}
+                                                    </p>
+                                                    <p className="ml-2 text-theme-secondary font-medium">verified</p>
+                                                </div>
+
+                                                <div className="grid grid-cols-2 gap-2 text-center">
+                                                    <div className="bg-theme-surface rounded-lg p-2">
+                                                        <p className="text-xs text-theme-secondary">Verified</p>
+                                                        <p className="text-lg font-bold text-green-400">
+                                                            {stats.verifiedStudents?.length || 0}
+                                                        </p>
+                                                    </div>
+                                                    <div className="bg-theme-surface rounded-lg p-2">
+                                                        <p className="text-xs text-theme-secondary">Pending</p>
+                                                        <p className="text-lg font-bold text-yellow-400">
+                                                            {stats.pendingRequests?.length || 0}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </Link>
 
                                         {/* Pending Approvals (Students or Events) */}
                                         <div className="card-theme rounded-2xl shadow-lg transition-colors duration-300 md:col-span-1">

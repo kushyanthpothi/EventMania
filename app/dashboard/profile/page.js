@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '../../hooks/useAuth';
 import { Header } from '../../components/layout/Header';
 import { Footer } from '../../components/layout/Footer';
@@ -7,6 +9,7 @@ import { PageLoader } from '../../components/common/Loader';
 import { USER_ROLES } from '../../lib/utils/constants';
 import { IoPerson, IoSchool, IoBusiness, IoShieldCheckmark, IoMail, IoLocation, IoGlobe, IoIdCard, IoTimeOutline, IoCheckmarkCircle } from 'react-icons/io5';
 import { motion } from 'framer-motion';
+import { showToast } from '../../components/common/Toast';
 
 const InfoCard = ({ icon: Icon, label, value, subLabel, className = "" }) => (
     <div className={`bg-white p-6 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-300 ${className}`}>
@@ -57,7 +60,15 @@ const StatusBadge = ({ verified, approved }) => {
 };
 
 export default function ProfilePage() {
+    const router = useRouter();
     const { user, userData, loading } = useAuth();
+
+    useEffect(() => {
+        if (!loading && !user) {
+            showToast.error('Please login to view your profile');
+            router.push('/login');
+        }
+    }, [user, loading, router]);
 
     if (loading) return <PageLoader />;
     if (!user) return null;
@@ -72,7 +83,7 @@ export default function ProfilePage() {
                     <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-24 relative z-10">
+                <div className="w-full px-4 sm:px-6 lg:px-8 -mt-24 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

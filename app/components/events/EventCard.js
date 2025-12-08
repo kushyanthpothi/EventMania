@@ -3,9 +3,12 @@
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { IoCalendar, IoLocation } from 'react-icons/io5';
-import { formatDate } from '../../lib/utils/helpers';
+import { formatDate, isEventOngoing } from '../../lib/utils/helpers';
 
 export const EventCard = ({ event }) => {
+    const isLive = isEventOngoing(event.startDate, event.endDate);
+    const hasLiveLink = event.liveLink && event.liveLink.trim() !== '';
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -38,12 +41,37 @@ export const EventCard = ({ event }) => {
 
                     {/* Floating Badges */}
                     <div className="absolute top-3 left-3 flex gap-2">
-                        <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold backdrop-blur-md shadow-sm ${event.type === 'inter'
-                            ? 'bg-indigo-500/90 text-white'
-                            : 'bg-purple-500/90 text-white'
-                            }`}>
-                            {event.type === 'inter' ? 'Global Event' : 'College Event'}
-                        </span>
+                        {isLive ? (
+                            <div className="relative">
+                                {/* Glowing background effect */}
+                                <div className="absolute inset-0 bg-red-500 rounded-lg blur-sm opacity-60 animate-pulse"></div>
+
+                                {/* Main badge */}
+                                <span className="relative px-3 py-1 rounded-lg text-[10px] font-bold text-white shadow-xl flex items-center gap-1.5 overflow-hidden"
+                                    style={{
+                                        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)',
+                                        boxShadow: '0 0 15px rgba(239, 68, 68, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3)'
+                                    }}>
+                                    {/* Animated shine effect */}
+                                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></span>
+
+                                    {/* Pulsing dot */}
+                                    <span className="relative flex h-1.5 w-1.5">
+                                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                        <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+                                    </span>
+
+                                    <span className="relative font-extrabold tracking-wider">LIVE</span>
+                                </span>
+                            </div>
+                        ) : (
+                            <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold backdrop-blur-md shadow-sm ${event.type === 'inter'
+                                ? 'bg-indigo-500/90 text-white'
+                                : 'bg-purple-500/90 text-white'
+                                }`}>
+                                {event.type === 'inter' ? 'Global Event' : 'College Event'}
+                            </span>
+                        )}
                     </div>
                 </div>
 
@@ -74,15 +102,27 @@ export const EventCard = ({ event }) => {
                         </div>
                     </div>
 
-                    <Link
-                        href={`/events/${event.id}`}
-                        className="mt-4 block w-full text-center bg-theme-surface hover:bg-indigo-600 text-theme hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
-                    >
-                        View Details
-                    </Link>
+                    {isLive && hasLiveLink ? (
+                        <a
+                            href={event.liveLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="mt-4 block w-full text-center bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
+                        >
+                            🔴 JOIN LIVE EVENT
+                        </a>
+                    ) : (
+                        <Link
+                            href={`/events/${event.id}`}
+                            className="mt-4 block w-full text-center bg-theme-surface hover:bg-indigo-600 text-theme hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
+                        >
+                            View Details
+                        </Link>
+                    )}
                 </div>
             </div>
         </motion.div>
     );
 };
+
 

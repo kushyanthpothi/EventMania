@@ -9,8 +9,8 @@ import { PageLoader } from '../../components/common/Loader';
 import { Button } from '../../components/common/Button';
 import { getDocument, queryDocuments, updateDocument } from '../../lib/firebase/firestore';
 import { COLLECTIONS, USER_ROLES, EVENT_STATUS } from '../../lib/utils/constants';
-import { formatDate } from '../../lib/utils/helpers';
-import { IoCalendar, IoLocation, IoArrowBack, IoPeople, IoTime, IoSchool, IoCheckmarkCircle, IoCloseCircle } from 'react-icons/io5';
+import { formatDate, isEventOngoing } from '../../lib/utils/helpers';
+import { IoCalendar, IoLocation, IoArrowBack, IoPeople, IoTime, IoSchool, IoCheckmarkCircle, IoCloseCircle, IoPencil, IoLink } from 'react-icons/io5';
 import { showToast } from '../../components/common/Toast';
 import Link from 'next/link';
 
@@ -74,6 +74,8 @@ export default function EventDetailsPage() {
     );
 
     const isStudent = userData?.role === USER_ROLES.STUDENT;
+    const isLive = isEventOngoing(event.startDate, event.endDate);
+    const hasLiveLink = event.liveLink && event.liveLink.trim() !== '';
 
     return (
         <div className="min-h-screen flex flex-col bg-theme transition-colors duration-300">
@@ -95,13 +97,42 @@ export default function EventDetailsPage() {
                     )}
 
                     <div className="absolute bottom-0 left-0 w-full p-8 md:p-12">
-                        <div className="max-w-7xl mx-auto">
-                            <button onClick={() => router.back()} className="flex items-center text-white/80 hover:text-white mb-4 transition-colors">
-                                <IoArrowBack className="mr-2" /> Go Back
-                            </button>
-                            <span className="inline-block px-4 py-1.5 rounded-full bg-indigo-600 text-white text-sm font-semibold mb-4">
-                                {event.category}
-                            </span>
+                        <div className="w-full">
+                            <div className="flex items-center gap-3 mb-4 flex-wrap">
+                                <button onClick={() => router.back()} className="flex items-center text-white/80 hover:text-white transition-colors">
+                                    <IoArrowBack className="mr-2" /> Go Back
+                                </button>
+
+                                {isLive && (
+                                    <div className="relative">
+                                        {/* Glowing background effect */}
+                                        <div className="absolute inset-0 bg-red-500 rounded-lg blur-sm opacity-60 animate-pulse"></div>
+
+                                        {/* Main badge */}
+                                        <span className="relative px-3 py-1.5 rounded-lg text-xs font-bold text-white shadow-xl flex items-center gap-1.5 overflow-hidden"
+                                            style={{
+                                                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)',
+                                                boxShadow: '0 0 15px rgba(239, 68, 68, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3)'
+                                            }}>
+                                            {/* Animated shine effect */}
+                                            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></span>
+
+                                            {/* Pulsing dot */}
+                                            <span className="relative flex h-1.5 w-1.5">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-white"></span>
+                                            </span>
+
+                                            <span className="relative font-extrabold tracking-wider">LIVE</span>
+                                        </span>
+                                    </div>
+                                )}
+
+                                <span className="inline-block px-4 py-1.5 rounded-full bg-indigo-600 text-white text-sm font-semibold">
+                                    {event.category}
+                                </span>
+                            </div>
+
                             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{event.name}</h1>
                             <div className="flex flex-wrap items-center gap-6 text-white/90">
                                 <span className="flex items-center">
@@ -115,7 +146,7 @@ export default function EventDetailsPage() {
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-8">
@@ -124,6 +155,26 @@ export default function EventDetailsPage() {
                                 <p className="text-theme-secondary whitespace-pre-line leading-relaxed">
                                     {event.description}
                                 </p>
+
+                                {hasLiveLink && (
+                                    <div className="mt-6 pt-6 border-t border-theme">
+                                        <div className="flex items-center justify-between">
+                                            <div>
+                                                <p className="text-sm text-theme-secondary font-medium mb-1">Event Link</p>
+                                                <p className="text-theme text-sm break-all">{event.liveLink}</p>
+                                            </div>
+                                            <a
+                                                href={event.liveLink}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="ml-4 flex items-center gap-2 px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-semibold whitespace-nowrap"
+                                            >
+                                                <IoLink size={18} />
+                                                Visit
+                                            </a>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             {event.isTeam && (
@@ -149,12 +200,23 @@ export default function EventDetailsPage() {
                                         <div className="bg-indigo-500/20 p-3 rounded-lg mr-4">
                                             <IoCalendar className="text-indigo-400" size={24} />
                                         </div>
-                                        <div>
-                                            <p className="text-sm text-theme-secondary font-medium">Date & Time</p>
-                                            <p className="text-theme font-semibold">{formatDate(event.startDate)}</p>
-                                            <p className="text-xs text-theme-secondary mt-1">
-                                                to {formatDate(event.endDate)}
-                                            </p>
+                                        <div className="flex-1">
+                                            <p className="text-sm text-theme-secondary font-medium mb-2">Date & Time</p>
+
+                                            {/* Start Date & Time */}
+                                            <div className="mb-3">
+                                                <p className="text-theme font-semibold text-base">
+                                                    {formatDate(event.startDate, 'PPP')} • {new Date(event.startDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                                </p>
+                                            </div>
+
+                                            {/* End Date & Time */}
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-xs text-theme-secondary">to</span>
+                                                <p className="text-theme-secondary text-sm">
+                                                    {formatDate(event.endDate, 'PPP')} • {new Date(event.endDate).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -169,7 +231,16 @@ export default function EventDetailsPage() {
                                     </div>
                                 </div>
 
-                                {isStudent ? (
+                                {isLive && hasLiveLink ? (
+                                    <a
+                                        href={event.liveLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="w-full py-4 text-lg bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        🔴 JOIN LIVE EVENT
+                                    </a>
+                                ) : isStudent ? (
                                     isRegistered ? (
                                         <Button
                                             className="w-full py-4 text-lg bg-green-600 hover:bg-green-700 cursor-default"
@@ -227,6 +298,14 @@ export default function EventDetailsPage() {
                                             <IoCloseCircle className="mr-2" size={20} /> Reject Event
                                         </Button>
                                     </div>
+                                ) : userData?.role === USER_ROLES.COLLEGE_ADMIN && event.createdBy === user.uid ? (
+                                    <Button
+                                        onClick={() => router.push(`/dashboard/events/${event.id}/edit`)}
+                                        className="w-full py-4 text-lg bg-orange-600 hover:bg-orange-700 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                                    >
+                                        <IoPencil size={20} />
+                                        Edit Event
+                                    </Button>
                                 ) : (
                                     <div className="bg-theme-surface p-4 rounded-xl text-center text-theme-secondary text-sm">
                                         {!user ? (

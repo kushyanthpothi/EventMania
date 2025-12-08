@@ -125,7 +125,7 @@ export default function EventsPage() {
         <div className="min-h-screen flex flex-col bg-theme transition-colors duration-300">
             <Header />
             <main className="flex-grow pt-20 pb-16">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="w-full px-4 sm:px-6 lg:px-8">
                     {/* Header */}
                     <div className="text-center mb-12">
                         <motion.h1
@@ -146,7 +146,7 @@ export default function EventsPage() {
                     </div>
 
                     {/* Filters - Modern Control Bar */}
-                    <div className="mx-auto max-w-7xl mb-12">
+                    <div className="mx-auto max-w-screen-2xl mb-12">
                         <motion.div
                             initial={{ y: -20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}

@@ -10,10 +10,12 @@ import { Button } from '../../../../components/common/Button';
 import { Dropdown } from '../../../../components/common/Dropdown';
 import { ImageUpload } from '../../../../components/common/ImageUpload';
 import { Toggle } from '../../../../components/common/Toggle';
+import { DateTimePicker } from '../../../../components/common/DateTimePicker';
 import { showToast } from '../../../../components/common/Toast';
 import { PageLoader } from '../../../../components/common/Loader';
 import { getDocument, updateDocument } from '../../../../lib/firebase/firestore';
-import { COLLECTIONS, EVENT_CATEGORIES, EVENT_TYPES, EVENT_STATUS } from '../../../../lib/utils/constants';
+import { COLLECTIONS, EVENT_CATEGORIES, EVENT_TYPES, EVENT_STATUS, USER_ROLES } from '../../../../lib/utils/constants';
+import { getMinDateTime, isTimeInPast } from '../../../../lib/utils/helpers';
 import { IoArrowBack } from 'react-icons/io5';
 import Link from 'next/link';
 
@@ -21,7 +23,7 @@ export default function EditEventPage() {
     const router = useRouter();
     const params = useParams();
     const eventId = params.id;
-    const { user, userData } = useAuth();
+    const { user, userData, loading: authLoading } = useAuth();
     const [loading, setLoading] = useState(false);
     const [fetching, setFetching] = useState(true);
     const [originalEvent, setOriginalEvent] = useState(null);
@@ -37,7 +39,8 @@ export default function EditEventPage() {
         teamCount: '',
         location: '',
         category: '',
-        otherCategory: ''
+        otherCategory: '',
+        liveLink: ''
     });
 
     const eventTypes = [
@@ -46,6 +49,19 @@ export default function EditEventPage() {
     ];
 
     const categories = Object.values(EVENT_CATEGORIES).map(cat => ({ value: cat, label: cat }));
+
+    // Authentication and authorization check
+    useEffect(() => {
+        if (!authLoading) {
+            if (!user) {
+                showToast.error('Please login to edit events');
+                router.push('/login');
+            } else if (userData && userData.role !== USER_ROLES.COLLEGE_ADMIN) {
+                showToast.error('Only college admins can edit events');
+                router.push('/dashboard');
+            }
+        }
+    }, [user, userData, authLoading, router]);
 
     // Fetch event data on mount
     useEffect(() => {
@@ -69,12 +85,33 @@ export default function EditEventPage() {
 
                 setOriginalEvent(data);
 
-                // Convert ISO date strings to datetime-local format
-                const formatDateForInput = (isoString) => {
-                    if (!isoString) return '';
-                    const date = new Date(isoString);
-                    return date.toISOString().slice(0, 16);
+                // Convert date strings to YYYY-MM-DDTHH:MM format
+                const formatDateForInput = (dateString) => {
+                    if (!dateString) return '';
+
+                    // Check if it's already in local format (YYYY-MM-DDTHH:MM:SS or YYYY-MM-DDTHH:MM)
+                    if (dateString.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/)) {
+                        // Already in correct format, just remove seconds if present
+                        return dateString.slice(0, 16);
+                    }
+
+                    // Otherwise, it's in UTC format (old data), convert it
+                    const date = new Date(dateString);
+
+                    // Get local date/time components
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                    // Return in YYYY-MM-DDTHH:MM format
+                    return `${year}-${month}-${day}T${hours}:${minutes}`;
                 };
+
+                // Check if the category is a predefined one or custom
+                const predefinedCategories = Object.values(EVENT_CATEGORIES);
+                const isCustomCategory = data.category && !predefinedCategories.includes(data.category);
 
                 setFormData({
                     name: data.name || '',
@@ -86,8 +123,9 @@ export default function EditEventPage() {
                     isTeam: data.isTeam || false,
                     teamCount: data.teamCount?.toString() || '',
                     location: data.location || '',
-                    category: data.category || '',
-                    otherCategory: ''
+                    category: isCustomCategory ? 'Other' : (data.category || ''),
+                    otherCategory: isCustomCategory ? data.category : '',
+                    liveLink: data.liveLink || ''
                 });
             } catch (error) {
                 console.error('Error fetching event:', error);
@@ -97,16 +135,22 @@ export default function EditEventPage() {
             }
         };
 
-        if (user) {
+        if (user && userData && userData.role === USER_ROLES.COLLEGE_ADMIN) {
             fetchEvent();
         }
-    }, [eventId, user, router]);
+    }, [eventId, user, userData, router]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         if (!formData.posterUrl) {
             showToast.error('Please upload an event poster');
+            return;
+        }
+
+        // Validate start date is not in the past
+        if (isTimeInPast(formData.startDate)) {
+            showToast.error('Start date and time cannot be in the past');
             return;
         }
 
@@ -121,21 +165,45 @@ export default function EditEventPage() {
             const finalCategory = formData.category === 'Other' ? formData.otherCategory : formData.category;
             if (!finalCategory) throw new Error('Please specify the event category');
 
-            // Determine status based on event type
-            // If it was rejected and user is resubmitting, set to pending for external events
-            const status = formData.type === EVENT_TYPES.INTRA ? EVENT_STATUS.APPROVED : EVENT_STATUS.PENDING;
+            // Determine status based on event type and current status
+            let status;
+            let statusMessage = '';
+
+            if (originalEvent.status === EVENT_STATUS.APPROVED) {
+                // Event is currently approved
+                if (formData.type === EVENT_TYPES.INTRA) {
+                    // Intra events stay approved
+                    status = EVENT_STATUS.APPROVED;
+                    statusMessage = 'Event updated successfully!';
+                } else {
+                    // Inter events need re-approval
+                    status = EVENT_STATUS.PENDING;
+                    statusMessage = 'Event sent for re-approval by Super Admin';
+                }
+            } else {
+                // New events or rejected events
+                status = formData.type === EVENT_TYPES.INTRA ? EVENT_STATUS.APPROVED : EVENT_STATUS.PENDING;
+                statusMessage = formData.type === EVENT_TYPES.INTRA
+                    ? 'Event updated successfully!'
+                    : 'Event sent for approval by Super Admin';
+            }
+
+            // Store datetime in local format (YYYY-MM-DDTHH:MM:SS) without timezone conversion
+            const startDateTime = formData.startDate + ':00'; // Add seconds
+            const endDateTime = formData.endDate + ':00'; // Add seconds
 
             const updatedData = {
                 name: formData.name,
                 description: formData.description,
                 type: formData.type,
-                startDate: new Date(formData.startDate).toISOString(),
-                endDate: new Date(formData.endDate).toISOString(),
+                startDate: startDateTime,
+                endDate: endDateTime,
                 posterUrl: formData.posterUrl,
                 isTeam: formData.isTeam,
                 teamCount: formData.isTeam ? parseInt(formData.teamCount) : 1,
                 location: formData.location,
                 category: finalCategory,
+                liveLink: formData.liveLink || null,
                 status: status,
                 approvalStatus: status,
                 updatedAt: new Date().toISOString(),
@@ -149,9 +217,7 @@ export default function EditEventPage() {
 
             if (error) throw new Error(error);
 
-            showToast.success(status === EVENT_STATUS.APPROVED
-                ? 'Event updated successfully!'
-                : 'Event resubmitted for approval!');
+            showToast.success(statusMessage);
             router.push('/dashboard');
 
         } catch (error) {
@@ -161,7 +227,8 @@ export default function EditEventPage() {
         }
     };
 
-    if (fetching) {
+    // Show loader while checking authentication or fetching event
+    if (authLoading || fetching || !user || (userData && userData.role !== USER_ROLES.COLLEGE_ADMIN)) {
         return <PageLoader />;
     }
 
@@ -253,22 +320,23 @@ export default function EditEventPage() {
                             <div className="space-y-6">
                                 <h3 className="text-xl font-semibold text-theme border-b border-theme pb-2 pt-4">Logistics</h3>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <Input
-                                        label="Start Date & Time"
-                                        type="datetime-local"
-                                        value={formData.startDate}
-                                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                                        required
-                                    />
-                                    <Input
-                                        label="End Date & Time"
-                                        type="datetime-local"
-                                        value={formData.endDate}
-                                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                        required
-                                    />
-                                </div>
+                                <DateTimePicker
+                                    label="Start Date & Time"
+                                    value={formData.startDate}
+                                    onChange={(value) => setFormData({ ...formData, startDate: value })}
+                                    minDateTime={originalEvent?.startDate} // Use original start date as minimum
+                                    allowPastDates={true}
+                                    required
+                                />
+
+                                <DateTimePicker
+                                    label="End Date & Time"
+                                    value={formData.endDate}
+                                    onChange={(value) => setFormData({ ...formData, endDate: value })}
+                                    minDateTime={formData.startDate} // End must be after start
+                                    allowPastDates={true}
+                                    required
+                                />
 
                                 <Input
                                     label="Location / Venue"
@@ -277,6 +345,17 @@ export default function EditEventPage() {
                                     required
                                     placeholder="e.g. Main Auditorium, Block A"
                                 />
+
+                                <Input
+                                    label="Live Event Link (Optional)"
+                                    type="url"
+                                    value={formData.liveLink}
+                                    onChange={(e) => setFormData({ ...formData, liveLink: e.target.value })}
+                                    placeholder="e.g. https://meet.google.com/xyz or https://zoom.us/j/123"
+                                />
+                                <p className="text-xs text-theme-secondary -mt-4">
+                                    Provide a link for live streaming or virtual event. This will be shown when the event is ongoing.
+                                </p>
 
                                 <Toggle
                                     label="This is a Team Event"

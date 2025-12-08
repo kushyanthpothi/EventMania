@@ -126,3 +126,23 @@ export const getEventTypeBadge = (type) => {
     };
     return badges[type] || badges.intra;
 };
+
+// Get minimum datetime for datetime-local input (current time)
+export const getMinDateTime = () => {
+    const now = new Date();
+    // Format: YYYY-MM-DDTHH:MM
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
+// Check if a datetime string is in the past
+export const isTimeInPast = (datetimeString) => {
+    if (!datetimeString) return false;
+    const selectedDate = new Date(datetimeString);
+    const now = new Date();
+    return selectedDate < now;
+};

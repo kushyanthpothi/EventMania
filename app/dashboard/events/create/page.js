@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../hooks/useAuth';
 import { Header } from '../../../components/layout/Header';
@@ -10,16 +10,32 @@ import { Button } from '../../../components/common/Button';
 import { Dropdown } from '../../../components/common/Dropdown';
 import { ImageUpload } from '../../../components/common/ImageUpload';
 import { Toggle } from '../../../components/common/Toggle';
+import { DateTimePicker } from '../../../components/common/DateTimePicker';
 import { showToast } from '../../../components/common/Toast';
+import { PageLoader } from '../../../components/common/Loader';
 import { createDocument } from '../../../lib/firebase/firestore';
-import { COLLECTIONS, EVENT_CATEGORIES, EVENT_TYPES } from '../../../lib/utils/constants';
+import { COLLECTIONS, EVENT_CATEGORIES, EVENT_TYPES, USER_ROLES } from '../../../lib/utils/constants';
+import { getMinDateTime, isTimeInPast } from '../../../lib/utils/helpers';
 import { IoArrowBack } from 'react-icons/io5';
 import Link from 'next/link';
 
 export default function CreateEventPage() {
     const router = useRouter();
-    const { user, userData } = useAuth();
+    const { user, userData, loading: authLoading } = useAuth();
     const [loading, setLoading] = useState(false);
+
+    // Authentication and authorization check
+    useEffect(() => {
+        if (!authLoading) {
+            if (!user) {
+                showToast.error('Please login to create events');
+                router.push('/login');
+            } else if (userData && userData.role !== USER_ROLES.COLLEGE_ADMIN) {
+                showToast.error('Only college admins can create events');
+                router.push('/dashboard');
+            }
+        }
+    }, [user, userData, authLoading, router]);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -32,7 +48,8 @@ export default function CreateEventPage() {
         teamCount: '',
         location: '',
         category: '',
-        otherCategory: ''
+        otherCategory: '',
+        liveLink: ''
     });
 
     const eventTypes = [
@@ -48,6 +65,12 @@ export default function CreateEventPage() {
 
         if (!formData.posterUrl) {
             showToast.error('Please upload an event poster');
+            return;
+        }
+
+        // Validate start date is not in the past
+        if (isTimeInPast(formData.startDate)) {
+            showToast.error('Start date and time cannot be in the past');
             return;
         }
 
@@ -69,17 +92,23 @@ export default function CreateEventPage() {
             // External -> Pending Super Admin approval
             const status = formData.type === EVENT_TYPES.INTRA ? 'approved' : 'pending';
 
+            // Store datetime in local format (YYYY-MM-DDTHH:MM:SS) without timezone conversion
+            // This preserves the exact time the user entered
+            const startDateTime = formData.startDate + ':00'; // Add seconds
+            const endDateTime = formData.endDate + ':00'; // Add seconds
+
             const eventData = {
                 name: formData.name,
                 description: formData.description,
                 type: formData.type,
-                startDate: new Date(formData.startDate).toISOString(),
-                endDate: new Date(formData.endDate).toISOString(),
+                startDate: startDateTime,
+                endDate: endDateTime,
                 posterUrl: formData.posterUrl,
                 isTeam: formData.isTeam,
                 teamCount: formData.isTeam ? parseInt(formData.teamCount) : 1,
                 location: formData.location,
                 category: finalCategory,
+                liveLink: formData.liveLink || null,
                 collegeId: `college_${user.uid}`, // Using convention from signup
                 collegeName: userData.collegeName || 'Unknown College', // Fallback
                 createdBy: user.uid,
@@ -103,6 +132,11 @@ export default function CreateEventPage() {
             setLoading(false);
         }
     };
+
+    // Show loader while checking authentication
+    if (authLoading || !user || (userData && userData.role !== USER_ROLES.COLLEGE_ADMIN)) {
+        return <PageLoader />;
+    }
 
     return (
         <div className="min-h-screen flex flex-col bg-theme transition-colors duration-300">
@@ -177,22 +211,20 @@ export default function CreateEventPage() {
                             <div className="space-y-6">
                                 <h3 className="text-xl font-semibold text-theme border-b border-theme pb-2 pt-4">Logistics</h3>
 
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <Input
-                                        label="Start Date & Time"
-                                        type="datetime-local"
-                                        value={formData.startDate}
-                                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                                        required
-                                    />
-                                    <Input
-                                        label="End Date & Time"
-                                        type="datetime-local"
-                                        value={formData.endDate}
-                                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                        required
-                                    />
-                                </div>
+                                <DateTimePicker
+                                    label="Start Date & Time"
+                                    value={formData.startDate}
+                                    onChange={(value) => setFormData({ ...formData, startDate: value })}
+                                    required
+                                />
+
+                                <DateTimePicker
+                                    label="End Date & Time"
+                                    value={formData.endDate}
+                                    onChange={(value) => setFormData({ ...formData, endDate: value })}
+                                    minDateTime={formData.startDate}
+                                    required
+                                />
 
                                 <Input
                                     label="Location / Venue"
@@ -201,6 +233,17 @@ export default function CreateEventPage() {
                                     required
                                     placeholder="e.g. Main Auditorium, Block A"
                                 />
+
+                                <Input
+                                    label="Live Event Link (Optional)"
+                                    type="url"
+                                    value={formData.liveLink}
+                                    onChange={(e) => setFormData({ ...formData, liveLink: e.target.value })}
+                                    placeholder="e.g. https://meet.google.com/xyz or https://zoom.us/j/123"
+                                />
+                                <p className="text-xs text-theme-secondary -mt-4">
+                                    Provide a link for live streaming or virtual event. This will be shown when the event is ongoing.
+                                </p>
 
                                 <Toggle
                                     label="This is a Team Event"
