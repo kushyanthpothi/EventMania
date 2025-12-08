@@ -52,29 +52,37 @@ Event Mania is a comprehensive event management platform designed for educationa
 
 ### Landing Page
 <!-- ![Landing Page](./screenshots/landing-page.png) -->
-*Add your landing page screenshot here*
+<img width="1440" height="781" alt="image" src="https://github.com/user-attachments/assets/500bd658-461a-44a7-91f0-044410352cbc" />
+
 
 ### Event Discovery
 <!-- ![Event Discovery](./screenshots/event-discovery.png) -->
-*Add your event discovery page screenshot here*
+<img width="1440" height="778" alt="image" src="https://github.com/user-attachments/assets/c71ba9fb-df5d-4981-bdea-5891cb470186" />
+
 
 ### Event Details
 <!-- ![Event Details](./screenshots/event-details.png) -->
-*Add your event details page screenshot here*
+<img width="1440" height="814" alt="image" src="https://github.com/user-attachments/assets/05be3536-6a0c-4b0e-93ca-cf00d3450e4c" />
 
-### Dashboard
+
+### Student Dashboard
 <!-- ![Dashboard](./screenshots/dashboard.png) -->
-*Add your dashboard screenshot here*
+<img width="1439" height="813" alt="image" src="https://github.com/user-attachments/assets/ac1a5a77-6a42-4944-ae5f-c117ab5a0e11" />
+
+### College Admin Dashboard
+
+<img width="1440" height="777" alt="image" src="https://github.com/user-attachments/assets/795397ca-42c0-43a6-b82d-b684b6365cdd" />
+
 
 ### Event Creation
 <!-- ![Event Creation](./screenshots/event-creation.png) -->
-*Add your event creation page screenshot here*
+<img width="1440" height="777" alt="image" src="https://github.com/user-attachments/assets/bf3dd377-3081-4f6a-8542-1357f7f860e9" />
+
 
 ### Registration Management
 <!-- ![Registration Management](./screenshots/registration-management.png) -->
-*Add your registration management screenshot here*
+<img width="1440" height="778" alt="image" src="https://github.com/user-attachments/assets/dae35176-35b1-4711-80da-73f0ff192ea0" />
 
-> **Note:** Replace the placeholder text with actual screenshots. Create a `screenshots` folder in your project root and add your images there, then uncomment the markdown image syntax.
 
 ## �🛠️ Tech Stack
 
