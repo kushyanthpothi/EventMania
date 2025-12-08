@@ -273,7 +273,7 @@ This is a private project. For any questions or suggestions, please contact the 
 ## 📧 Contact
 
 For support or inquiries, reach out to us at:
-- Email: support@eventmania.com
+- Email: kushyanthpothineni2003@gmail.com
 - GitHub: [@kushyanthpothi](https://github.com/kushyanthpothi)
 
 ## 🙏 Acknowledgments
