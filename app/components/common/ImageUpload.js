@@ -10,12 +10,15 @@ import { Loader } from './Loader';
 export const ImageUpload = ({
     label,
     onUploadComplete,
+    onFileSelect,
     currentImage = null,
     required = false,
-    className = ''
+    className = '',
+    uploadImmediately = false // New prop to control upload behavior
 }) => {
     const [preview, setPreview] = useState(currentImage);
     const [uploading, setUploading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
     const fileInputRef = useRef(null);
 
     const handleFileSelect = async (e) => {
@@ -28,28 +31,44 @@ export const ImageUpload = ({
             return;
         }
 
+        // Create preview
         const reader = new FileReader();
         reader.onloadend = () => {
             setPreview(reader.result);
         };
         reader.readAsDataURL(file);
 
-        setUploading(true);
-        const { url, error } = await uploadImage(file);
-        setUploading(false);
+        if (uploadImmediately) {
+            // Old behavior: Upload immediately
+            setUploading(true);
+            const { url, error } = await uploadImage(file);
+            setUploading(false);
 
-        if (error) {
-            showToast.error(`Upload failed: ${error}`);
-            setPreview(currentImage);
+            if (error) {
+                showToast.error(`Upload failed: ${error}`);
+                setPreview(currentImage);
+            } else {
+                showToast.success('Image uploaded successfully!');
+                onUploadComplete(url);
+            }
         } else {
-            showToast.success('Image uploaded successfully!');
-            onUploadComplete(url);
+            // New behavior: Just store the file and show preview
+            setSelectedFile(file);
+            if (onFileSelect) {
+                onFileSelect(file);
+            }
         }
     };
 
     const handleRemove = () => {
         setPreview(null);
-        onUploadComplete(null);
+        setSelectedFile(null);
+        if (onUploadComplete) {
+            onUploadComplete(null);
+        }
+        if (onFileSelect) {
+            onFileSelect(null);
+        }
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }

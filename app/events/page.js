@@ -145,48 +145,56 @@ export default function EventsPage() {
                         </motion.p>
                     </div>
 
-                    {/* Filters - Modern Control Bar */}
-                    <div className="mx-auto max-w-screen-2xl mb-12">
-                        <motion.div
-                            initial={{ y: -20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            className="glass-effect shadow-xl rounded-2xl p-3 flex flex-col md:flex-row gap-4 items-center"
-                        >
-                            <div className="flex-grow w-full md:w-auto">
-                                <Input
-                                    placeholder="Search events by name or description..."
-                                    value={filters.search}
-                                    onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                                    icon={<IoSearch className="text-indigo-500" />}
-                                    className="border-0 bg-transparent shadow-none focus:ring-0 text-lg placeholder:text-theme-secondary"
-                                />
+                    {/* Modern Filters - Single Line */}
+                    <motion.div
+                        initial={{ y: -20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        className="mx-auto max-w-screen-2xl mb-12"
+                    >
+                        <div className="flex flex-col lg:flex-row gap-4 items-stretch">
+                            {/* Search Input - Modern Design */}
+                            <div className="flex-1 relative group">
+                                <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <div className="relative">
+                                    <Input
+                                        placeholder="Search events by name or description..."
+                                        value={filters.search}
+                                        onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                                        icon={<IoSearch className="text-indigo-500" size={20} />}
+                                        className="border-0 bg-theme-surface/50 backdrop-blur-sm shadow-lg hover:shadow-xl focus:shadow-2xl transition-all duration-300 text-lg placeholder:text-theme-secondary rounded-2xl px-6 py-4"
+                                    />
+                                </div>
                             </div>
 
-                            <div className="h-8 w-px bg-theme-secondary/20 hidden md:block"></div>
-
-                            <div className="w-full md:w-64">
-                                <Dropdown
-                                    placeholder="All Categories"
-                                    options={[{ value: '', label: 'All Categories' }, ...categoryOptions]}
-                                    value={filters.category}
-                                    onChange={(value) => setFilters({ ...filters, category: value })}
-                                    className="border-0 shadow-none bg-transparent"
-                                />
+                            {/* Category Filter - Modern Design */}
+                            <div className="lg:w-72 relative group">
+                                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-indigo-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <div className="relative">
+                                    <Dropdown
+                                        placeholder="All Categories"
+                                        options={[{ value: '', label: 'All Categories' }, ...categoryOptions]}
+                                        value={filters.category}
+                                        onChange={(value) => setFilters({ ...filters, category: value })}
+                                        className="border-0 bg-theme-surface/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl px-6 py-4 text-base font-medium"
+                                    />
+                                </div>
                             </div>
 
-                            <div className="h-8 w-px bg-theme-secondary/20 hidden md:block"></div>
-
-                            <div className="w-full md:w-48">
-                                <Dropdown
-                                    placeholder="All Types"
-                                    options={[{ value: '', label: 'All Types' }, ...typeOptions]}
-                                    value={filters.type}
-                                    onChange={(value) => setFilters({ ...filters, type: value })}
-                                    className="border-0 shadow-none bg-transparent"
-                                />
+                            {/* Type Filter - Modern Design */}
+                            <div className="lg:w-64 relative group">
+                                <div className="absolute inset-0 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                                <div className="relative">
+                                    <Dropdown
+                                        placeholder="All Types"
+                                        options={[{ value: '', label: 'All Types' }, ...typeOptions]}
+                                        value={filters.type}
+                                        onChange={(value) => setFilters({ ...filters, type: value })}
+                                        className="border-0 bg-theme-surface/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 rounded-2xl px-6 py-4 text-base font-medium"
+                                    />
+                                </div>
                             </div>
-                        </motion.div>
-                    </div>
+                        </div>
+                    </motion.div>
 
                     {/* Events Grid */}
                     {loading ? (

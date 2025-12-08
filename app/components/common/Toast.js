@@ -19,6 +19,14 @@ export const showToast = {
             color: '#fff',
         },
     }),
+    info: (message) => toast(message, {
+        duration: 3000,
+        position: 'top-right',
+        style: {
+            background: '#3b82f6',
+            color: '#fff',
+        },
+    }),
     loading: (message) => toast.loading(message, {
         position: 'top-right',
     }),

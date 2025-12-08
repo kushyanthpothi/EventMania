@@ -48,7 +48,7 @@ export const Header = () => {
     ];
 
     return (
-        <header className="fixed top-0 left-0 right-0 z-30 transition-all duration-300 backdrop-blur-md">
+        <header className="fixed top-0 left-0 right-0 z-30 transition-all duration-300 backdrop-blur-md bg-transparent">
             <nav className="w-full px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     <Link href="/" className="flex items-center space-x-2">

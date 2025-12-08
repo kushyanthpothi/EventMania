@@ -267,14 +267,14 @@ export default function DashboardPage() {
     return (
         <div className="min-h-screen flex flex-col bg-theme transition-colors duration-300">
             <Header />
-            <main className="flex-grow pt-20 pb-20">
+            <main className="flex-grow pb-20">
                 {/* 1. HERO & PROFILE SECTION (From Profile Page) */}
-                <div className="relative h-64 bg-slate-900 overflow-hidden">
+                <div className="relative h-80 bg-slate-900 overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 opacity-90"></div>
                     <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)', backgroundSize: '24px 24px' }}></div>
                 </div>
 
-                <div className="w-full px-4 sm:px-6 lg:px-8 -mt-32 relative z-10">
+                <div className="w-full px-4 sm:px-6 lg:px-8 -mt-48 relative z-10">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}

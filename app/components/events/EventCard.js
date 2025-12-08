@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { IoCalendar, IoLocation } from 'react-icons/io5';
 import { formatDate, isEventOngoing } from '../../lib/utils/helpers';
 
-export const EventCard = ({ event }) => {
+export const EventCard = ({ event, preview = false }) => {
     const isLive = isEventOngoing(event.startDate, event.endDate);
     const hasLiveLink = event.liveLink && event.liveLink.trim() !== '';
 
@@ -17,9 +17,8 @@ export const EventCard = ({ event }) => {
             className="group h-full"
         >
             <div
-                className="h-full card-theme rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
+                className="h-full rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col backdrop-blur-md bg-white/5 dark:bg-black/5"
                 style={{
-                    backgroundColor: 'rgb(var(--card-bg))',
                     borderColor: 'rgb(var(--card-border))',
                     borderWidth: '1px',
                     borderStyle: 'solid'
@@ -44,14 +43,10 @@ export const EventCard = ({ event }) => {
                         {isLive ? (
                             <div className="relative">
                                 {/* Glowing background effect */}
-                                <div className="absolute inset-0 bg-red-500 rounded-lg blur-sm opacity-60 animate-pulse"></div>
+                                <div className="absolute inset-0 bg-gradient-to-r from-red-500 to-pink-500 rounded-lg blur-sm opacity-60 animate-pulse"></div>
 
                                 {/* Main badge */}
-                                <span className="relative px-3 py-1 rounded-lg text-[10px] font-bold text-white shadow-xl flex items-center gap-1.5 overflow-hidden"
-                                    style={{
-                                        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #b91c1c 100%)',
-                                        boxShadow: '0 0 15px rgba(239, 68, 68, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3)'
-                                    }}>
+                                <span className="relative px-3 py-1.5 rounded-lg text-[10px] font-bold text-white shadow-xl flex items-center gap-1.5 overflow-hidden bg-gradient-to-r from-red-500 to-pink-500">
                                     {/* Animated shine effect */}
                                     <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer"></span>
 
@@ -102,27 +97,42 @@ export const EventCard = ({ event }) => {
                         </div>
                     </div>
 
-                    {isLive && hasLiveLink ? (
-                        <a
-                            href={event.liveLink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="mt-4 block w-full text-center bg-red-600 hover:bg-red-700 text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg hover:shadow-xl"
-                        >
-                            🔴 JOIN LIVE EVENT
-                        </a>
-                    ) : (
-                        <Link
-                            href={`/events/${event.id}`}
-                            className="mt-4 block w-full text-center bg-theme-surface hover:bg-indigo-600 text-theme hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
-                        >
-                            View Details
-                        </Link>
+
+                    {!preview && (
+                        <>
+                            {isLive && hasLiveLink ? (
+                                <div className="mt-4 flex gap-2">
+                                    <a
+                                        href={event.liveLink}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="flex-1 text-center bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+                                    >
+                                        <span className="relative flex h-2 w-2">
+                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                            <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                        </span>
+                                        Join Live
+                                    </a>
+                                    <Link
+                                        href={`/events/${event.id}`}
+                                        className="flex-1 text-center bg-theme-surface hover:bg-indigo-600 text-theme hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
+                                    >
+                                        View Details
+                                    </Link>
+                                </div>
+                            ) : (
+                                <Link
+                                    href={`/events/${event.id}`}
+                                    className="mt-4 block w-full text-center bg-theme-surface hover:bg-indigo-600 text-theme hover:text-white py-2.5 rounded-xl text-sm font-semibold transition-all duration-300"
+                                >
+                                    View Details
+                                </Link>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
         </motion.div>
     );
 };
-
-

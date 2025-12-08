@@ -48,7 +48,35 @@ Event Mania is a comprehensive event management platform designed for educationa
 - Dark mode support
 - Mobile-first approach
 
-## 🛠️ Tech Stack
+## � Screenshots
+
+### Landing Page
+<!-- ![Landing Page](./screenshots/landing-page.png) -->
+*Add your landing page screenshot here*
+
+### Event Discovery
+<!-- ![Event Discovery](./screenshots/event-discovery.png) -->
+*Add your event discovery page screenshot here*
+
+### Event Details
+<!-- ![Event Details](./screenshots/event-details.png) -->
+*Add your event details page screenshot here*
+
+### Dashboard
+<!-- ![Dashboard](./screenshots/dashboard.png) -->
+*Add your dashboard screenshot here*
+
+### Event Creation
+<!-- ![Event Creation](./screenshots/event-creation.png) -->
+*Add your event creation page screenshot here*
+
+### Registration Management
+<!-- ![Registration Management](./screenshots/registration-management.png) -->
+*Add your registration management screenshot here*
+
+> **Note:** Replace the placeholder text with actual screenshots. Create a `screenshots` folder in your project root and add your images there, then uncomment the markdown image syntax.
+
+## �🛠️ Tech Stack
 
 | Component | Technology |
 |-----------|-----------|

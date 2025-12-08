@@ -334,15 +334,17 @@ export default function Home() {
                   </Link>
                 </motion.div>
 
-                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                  <Link
-                    href="/signup"
-                    className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md text-white px-10 py-4 rounded-2xl font-bold text-lg border-2 border-white/30 hover:bg-white/20 transition-all shadow-xl"
-                  >
-                    <IoPersonAdd size={22} />
-                    Get Started Free
-                  </Link>
-                </motion.div>
+                {!isAuthenticated && (
+                  <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                    <Link
+                      href="/signup"
+                      className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-md text-white px-10 py-4 rounded-2xl font-bold text-lg border-2 border-white/30 hover:bg-white/20 transition-all shadow-xl"
+                    >
+                      <IoPersonAdd size={22} />
+                      Get Started Free
+                    </Link>
+                  </motion.div>
+                )}
               </motion.div>
 
               {/* Trust Indicators */}
