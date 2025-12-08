@@ -116,11 +116,25 @@ export default function DashboardPage() {
             const pendingRequests = students?.filter(s => !s.verified) || [];
             const verifiedStudents = students?.filter(s => s.verified) || [];
             const pendingEvents = createdEvents?.filter(e => e.status === 'pending') || [];
+            
+            // Fetch total registrations for all events
+            let totalRegistrations = 0;
+            if (createdEvents && createdEvents.length > 0) {
+                const eventIds = createdEvents.map(e => e.id);
+                for (const eventId of eventIds) {
+                    const { data: registrations } = await queryDocuments(COLLECTIONS.REGISTRATIONS, [
+                        { field: 'eventId', operator: '==', value: eventId }
+                    ]);
+                    totalRegistrations += registrations?.length || 0;
+                }
+            }
+            
             setStats({
                 createdEvents: createdEvents || [],
                 pendingRequests: pendingRequests || [],
                 verifiedStudents: verifiedStudents || [],
                 pendingEvents: pendingEvents,
+                totalRegistrations: totalRegistrations,
                 collegeName: collegeData?.name || userData?.collegeName,
                 collegeLocation: collegeData?.location || userData?.collegeLocation
             });
@@ -702,36 +716,31 @@ export default function DashboardPage() {
                                             </div>
                                         </Link>
 
-                                        {/* Pending Approvals (Students or Events) */}
-                                        <div className="card-theme rounded-2xl shadow-lg transition-colors duration-300 md:col-span-1">
+                                        {/* Event Registrations */}
+                                        <Link href="/dashboard/registrations" className="card-theme rounded-2xl shadow-lg transition-colors duration-300 md:col-span-1 block hover:border-indigo-500/30">
                                             <div className="p-6 h-full">
-                                                <div className="flex items-center space-x-3 mb-4">
-                                                    <div className="p-2 bg-pink-500/20 rounded-lg text-pink-400">
-                                                        <IoPeople size={20} />
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="p-2 bg-purple-500/20 rounded-lg text-purple-400">
+                                                            <IoCheckmarkCircle size={20} />
+                                                        </div>
+                                                        <h3 className="font-bold text-theme">Event Registrations</h3>
                                                     </div>
-                                                    <h3 className="font-bold text-theme">Pending Requests</h3>
+                                                    <IoArrowForward className="text-theme-secondary" size={20} />
                                                 </div>
-                                                <div className="space-y-3 max-h-60 overflow-y-auto">
-                                                    {stats.pendingRequests.length > 0 ? (
-                                                        stats.pendingRequests.map(req => (
-                                                            <div key={req.uid} className="p-3 bg-theme-surface rounded-lg border border-theme flex justify-between items-center">
-                                                                <div>
-                                                                    <p className="font-semibold text-sm text-theme">{req.name}</p>
-                                                                    <p className="text-xs text-theme-secondary">{req.registrationNumber}</p>
-                                                                </div>
-                                                                <div className="flex space-x-2">
-                                                                    <Link href="/dashboard/verifications" className="text-xs bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700">
-                                                                        Review
-                                                                    </Link>
-                                                                </div>
-                                                            </div>
-                                                        ))
-                                                    ) : (
-                                                        <p className="text-theme-secondary text-sm italic">No pending requests.</p>
-                                                    )}
+
+                                                <div className="flex items-baseline mb-4">
+                                                    <p className="text-5xl font-black text-purple-500">
+                                                        {stats.totalRegistrations || 0}
+                                                    </p>
+                                                    <p className="ml-2 text-theme-secondary font-medium">registrations</p>
                                                 </div>
+
+                                                <p className="text-sm text-theme-secondary">
+                                                    View all registrations across your events
+                                                </p>
                                             </div>
-                                        </div>
+                                        </Link>
                                     </>
                                 )}
 
